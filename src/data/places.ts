@@ -259,7 +259,7 @@ export const places: Place[] = [
     description:
       "贺兰山横亘银川西侧，岩壁与松林把塞上平原和戈壁分开。沿山径走近岩画与峡谷，也能在不同高度回望黄河灌区与城市轮廓，感受山脉如何塑造一方气候与生活。",
     hours: "以当日公告为准",
-    hoursNote: "淡旺季售票与闭园时间不同；天气与防火管制可能影响进山，请关注景区当日公告。",
+    hoursNote: "淡旺季售票与闭园时间不同；天气与防火管制可能影响进山，请查看景区当日公告。",
     source: "https://www.hlstour.com/",
     image: "/places/helan.jpg",
     highlights: ["岩画", "苏峪口", "滚钟口"],
@@ -279,7 +279,7 @@ export const places: Place[] = [
     description:
       "贺兰山东麓的陵台与残垣，在戈壁光线中显出西夏王朝的轮廓。沿着陵区步道，把帝陵、陪葬墓与博物馆展示连成一条阅读线，理解这座「东方金字塔」群的尺度与沉默。",
     hours: "以当日公告为准",
-    hoursNote: "淡旺季开放时段不同；参观路线与临时封闭请以景区当日说明为准。",
+    hoursNote: "淡旺季开放时段不同；参观路线与临时封闭请查看景区当日公告。",
     source: "https://whhlyt.nx.gov.cn/jqjd/ycs_66553/xxl/",
     image: "/places/xixia.jpg",
     highlights: ["三号陵", "博物馆", "陵邑遗址"],
@@ -299,7 +299,7 @@ export const places: Place[] = [
     description:
       "宝塔立于延河之畔，成为延安城最醒目的天际线。登山俯瞰河谷与街巷，也能走近塔身、铁钟与革命纪念空间，把地貌、城市与历史记忆叠合在同一座小山上。",
     hours: "以当日公告为准",
-    hoursNote: "登塔与展馆开放可能分时、限流；请关注延安文旅当日安排。",
+    hoursNote: "登塔与展馆开放可能分时、限流；请查看延安文旅当日公告。",
     source: "https://www.ya.gov.cn/",
     image: "/places/baota.jpg",
     highlights: ["延安宝塔", "明代铁钟", "延河眺望"],
@@ -319,7 +319,7 @@ export const places: Place[] = [
     description:
       "黄河在晋陕峡谷收束成壶口，浊浪跌落，水雾与轰鸣同时扑面而来。枯水、桃花汛与冬季挂冰会改写同一处河床的表情，适合把时间留给观景平台与对岸的远望。",
     hours: "以当日公告为准",
-    hoursNote: "陕晋两侧景区分别售票与检票；水位、冰凌与夜游项目可能临时调整，出发前核实两侧公告。",
+    hoursNote: "陕晋两侧景区分别售票与检票；水位、冰凌与夜游项目可能临时调整，请查看两侧当日公告。",
     source: "https://www.ya.gov.cn/",
     image: "/places/hukou.jpg",
     highlights: ["观瀑台", "孟门山", "黄河冰挂"],
@@ -339,7 +339,7 @@ export const places: Place[] = [
     description:
       "阿里以高原湖泊、雪峰与旷野著称。玛旁雍错的湖面与冈仁波齐的轮廓彼此呼应，旅行需要更充足的适应与补给；慢下来，才能读懂这片土地的辽阔与敬畏。",
     hours: "以季节与路况为准",
-    hoursNote: "高海拔、边境管理与季节性道路封闭风险高；请提前了解通行证、氧气与救援条件，勿冒进。",
+    hoursNote: "高海拔、边境管理与季节性道路封闭风险高；请提前了解通行证、氧气与救援条件，并查看当地当日通行公告，勿冒进。",
     source: "https://wlt.xizang.gov.cn/",
     image: "/places/ali.jpg",
     highlights: ["玛旁雍错", "冈仁波齐", "古格遗址"],
@@ -359,7 +359,7 @@ export const places: Place[] = [
     description:
       "茶馆、街巷与公园把成都的节奏铺得很慢。从宽窄巷子走到锦江两岸，也可以把大熊猫基地与城市天际线放进同一段旅程，体会「烟火气」如何成为这座城市的底色。",
     hours: "城市公共空间常年可访",
-    hoursNote: "博物馆、公园与大熊猫基地各自预约与闭馆规则不同，出发前分别核实。",
+    hoursNote: "博物馆、公园与大熊猫基地各自预约与闭馆规则不同，请查看各场馆当日公告。",
     source: "https://www.cdtour.com/",
     image: "/places/chengdu.jpg",
     highlights: ["宽窄巷子", "大熊猫基地", "锦江夜色"],
@@ -379,7 +379,7 @@ export const places: Place[] = [
     description:
       "徽派马头墙点缀在丘陵与田野之间，春季油菜花与秋季晒秋成为婺源最易辨认的季节色彩。沿着江岭、篁岭与古村落慢慢走，山水与民居共同构成「最美乡村」的日常画面。",
     hours: "以各村落景区公告为准",
-    hoursNote: "江岭、篁岭等热门点需单独购票与预约；花期与节假日可能限流。",
+    hoursNote: "江岭、篁岭等热门点需单独购票与预约；花期与节假日可能限流，请查看各村落景区当日公告。",
     source: "https://www.wyhl.cc/",
     image: "/places/wuyuan.jpg",
     highlights: ["江岭花海", "篁岭晒秋", "李坑古村"],

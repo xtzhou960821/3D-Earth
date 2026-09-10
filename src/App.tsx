@@ -30,6 +30,7 @@ import {
   LoaderCircle,
   Menu,
   Download,
+  FileUp,
 } from "lucide-react";
 import { Globe } from "./components/Globe";
 import PlaceDetail from "./components/PlaceDetail";
@@ -39,11 +40,17 @@ import { places } from "./data/places";
 import type { Category, CheckIn, Layer, MapHandle, Place } from "./types";
 import { api, persist, readStorage } from "./lib/api";
 import { publicUrl } from "./lib/publicUrl";
+import {
+  mergeTravelRecords,
+  parseTravelRecords,
+  type TravelRecordsDoc,
+} from "./lib/travelRecords";
 const ImportDialog = lazy(() => import("./components/ImportDialog"));
 const Panorama = lazy(() => import("./components/Panorama"));
 const categories = ["全部", "自然风光", "人文古迹", "城市漫游"] as const;
 export default function App() {
   const map = useRef<MapHandle>(null);
+  const importRecordsRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState(""),
     [category, setCategory] = useState<Category | "全部">("全部"),
     [tab, setTab] = useState<"explore" | "favorites" | "checkins">("explore"),
@@ -67,10 +74,13 @@ export default function App() {
     [layerStatuses, setLayerStatuses] = useState<Record<string, string>>({}),
     [showLayers, setShowLayers] = useState(false),
     [importing, setImporting] = useState(false),
+    /** Whether Express `/api/layers` is reachable (false on static Pages). */
+    [apiAvailable, setApiAvailable] = useState(false),
     [panorama, setPanorama] = useState<Layer | null>(null),
     [settings, setSettings] = useState(false),
     [terrain, setTerrain] = useState(true),
     [buildings, setBuildings] = useState(false),
+    [buildingsHint, setBuildingsHint] = useState(""),
     [labels, setLabels] = useState(true),
     [status, setStatus] = useState("正在载入地球…"),
     [height, setHeight] = useState(9500000),
@@ -78,22 +88,39 @@ export default function App() {
     [checkPlace, setCheckPlace] = useState<Place | null>(null),
     [date, setDate] = useState(""),
     [note, setNote] = useState(""),
-    [mobileOpen, setMobileOpen] = useState(false);
+    [mobileOpen, setMobileOpen] = useState(false),
+    [pendingRecords, setPendingRecords] = useState<TravelRecordsDoc | null>(
+      null,
+    );
   const notify = useCallback((text: string) => setToast(text), []);
   const closeImport = useCallback(() => setImporting(false), []),
     closePanorama = useCallback(() => setPanorama(null), []),
     closeSettings = useCallback(() => setSettings(false), []),
     closeCheck = useCallback(() => setCheckPlace(null), []);
+  const onBuildingsFailed = useCallback((message: string) => {
+    setBuildings(false);
+    setBuildingsHint(message);
+    setStatus(message);
+  }, []);
+  const openImport = useCallback(() => {
+    if (!apiAvailable) {
+      notify("完整导入能力请本机 npm start");
+      return;
+    }
+    setImporting(true);
+  }, [apiAvailable, notify]);
   useEffect(() => {
     api<Layer[]>("/layers")
-      .then(setLayers)
+      .then((list) => {
+        setLayers(list);
+        setApiAvailable(true);
+      })
       .catch(() => {
-        // Static Pages builds have no Express `/api/layers`; keep browsing without toast noise.
-        if (import.meta.env.VITE_CESIUM_ION_TOKEN !== undefined || import.meta.env.BASE_URL !== "/")
-          return;
-        notify("内容库连接失败，请确认本地服务已启动");
+        setApiAvailable(false);
+        // Static Pages (or any host without Express): no noisy toast.
+        // Local `npm run dev` without the API still gets a quiet disabled import tip.
       });
-  }, [notify]);
+  }, []);
   useEffect(() => {
     if (!toast) return;
     const id = setTimeout(() => setToast(""), 4500);
@@ -184,6 +211,49 @@ export default function App() {
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
     notify("旅行记录已导出");
+  }
+  /**
+   * Read and validate a travel-records JSON file, then ask merge vs replace.
+   * @param file Selected JSON file
+   */
+  async function loadTravelRecordsFile(file: File) {
+    try {
+      const text = await file.text();
+      const parsed = parseTravelRecords(JSON.parse(text) as unknown);
+      setPendingRecords(parsed);
+    } catch (e) {
+      notify(e instanceof Error ? e.message : "无法读取旅行记录文件");
+    } finally {
+      if (importRecordsRef.current) importRecordsRef.current.value = "";
+    }
+  }
+  /**
+   * Apply pending import into localStorage keys `shanhai-favorites` / `shanhai-checkins`.
+   * @param mode merge keeps local ids; replace overwrites both stores
+   */
+  function applyTravelRecords(mode: "merge" | "replace") {
+    if (!pendingRecords) return;
+    const next =
+      mode === "replace"
+        ? {
+            favorites: pendingRecords.favorites,
+            checkins: pendingRecords.checkins,
+          }
+        : mergeTravelRecords({ favorites, checkins }, pendingRecords);
+    try {
+      persist("shanhai-favorites", next.favorites);
+      persist("shanhai-checkins", next.checkins);
+      setFavorites(next.favorites);
+      setCheckins(next.checkins);
+      setPendingRecords(null);
+      notify(
+        mode === "replace"
+          ? "旅行记录已替换"
+          : "旅行记录已合并到本地收藏与打卡",
+      );
+    } catch {
+      notify("浏览器存储不可用，导入未保存");
+    }
   }
   const onLayerStatus = useCallback(
     (id: string, value: string) =>
@@ -279,7 +349,8 @@ export default function App() {
               onChange={setLayers}
               onFocus={(l) => map.current?.focusLayer(l)}
               onPanorama={setPanorama}
-              onImport={() => setImporting(true)}
+              onImport={openImport}
+              importEnabled={apiAvailable}
               onBack={() => setShowLayers(false)}
               notify={notify}
             />
@@ -296,7 +367,8 @@ export default function App() {
                 map.current?.flyTo(selected);
                 setMobileOpen(false);
               }}
-              onImport={() => setImporting(true)}
+              onImport={openImport}
+              importEnabled={apiAvailable}
             />
           ) : (
             <div className="destinations">
@@ -412,11 +484,18 @@ export default function App() {
         <footer className="sidebar-footer">
           <button
             className="outline-button full-width"
-            onClick={() => setImporting(true)}
+            onClick={openImport}
+            disabled={!apiAvailable}
+            title={
+              apiAvailable ? undefined : "完整导入能力请本机 npm start"
+            }
           >
             <Upload size={18} />
             导入我的内容
           </button>
+          {!apiAvailable && (
+            <p className="import-disabled-tip">完整导入能力请本机 npm start</p>
+          )}
           <button
             className={`layers-button ${showLayers ? "active" : ""}`}
             onClick={() => {
@@ -441,6 +520,7 @@ export default function App() {
           onPanorama={setPanorama}
           onStatus={setStatus}
           onLayerStatus={onLayerStatus}
+          onBuildingsFailed={onBuildingsFailed}
           onCamera={setHeight}
           terrain={terrain}
           buildings={buildings}
@@ -614,9 +694,14 @@ export default function App() {
               },
               {
                 label: "全球建筑",
-                description: "加载 Cesium OSM 建筑，近距离可见",
+                description: buildingsHint
+                  ? `${buildingsHint} · 再次开启可重试。需 ion 令牌具备 OSM Buildings 资源权限。`
+                  : "加载 Cesium OSM 建筑（需 ion 令牌开通 OSM Buildings 资产）",
                 value: buildings,
-                action: setBuildings,
+                action: (on: boolean) => {
+                  if (on) setBuildingsHint("");
+                  setBuildings(on);
+                },
               },
               {
                 label: "景点名称",
@@ -645,8 +730,10 @@ export default function App() {
               <span className="service-dot" />
               {status}
               <p>
-                卫星影像与地形通过 Cesium ion
-                加载。浏览器使用客户端访问令牌；本地文件保存在此电脑。
+                卫星影像、地形与 OSM 建筑通过 Cesium ion
+                加载。本地 `.env` 的 `CESIUM_ION_TOKEN` 经 `/api/config`
+                下发；GitHub Pages 可选 Secret `VITE_CESIUM_ION_TOKEN`（未配置时保持基础地球，不报错）。令牌需具备所需资源（含
+                OSM Buildings）的读取权限。
               </p>
             </div>
             <button
@@ -656,6 +743,64 @@ export default function App() {
               <Download size={16} />
               导出收藏与打卡记录
             </button>
+            <input
+              ref={importRecordsRef}
+              type="file"
+              accept="application/json,.json"
+              hidden
+              aria-label="选择旅行记录 JSON"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) void loadTravelRecordsFile(file);
+              }}
+            />
+            <button
+              className="secondary-button full-width"
+              type="button"
+              onClick={() => importRecordsRef.current?.click()}
+            >
+              <FileUp size={16} />
+              导入收藏与打卡记录
+            </button>
+            {pendingRecords && (
+              <div className="records-import-confirm">
+                <p>
+                  将导入收藏 {pendingRecords.favorites.length} 项、打卡{" "}
+                  {Object.keys(pendingRecords.checkins).length}{" "}
+                  项。请选择与本地记录的合并方式：
+                </p>
+                <div className="records-import-actions">
+                  <button
+                    type="button"
+                    className="primary-button"
+                    onClick={() => applyTravelRecords("merge")}
+                  >
+                    合并
+                  </button>
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          "将用文件内容替换当前浏览器中的全部收藏与打卡，确定吗？",
+                        )
+                      )
+                        applyTravelRecords("replace");
+                    }}
+                  >
+                    替换
+                  </button>
+                  <button
+                    type="button"
+                    className="text-button"
+                    onClick={() => setPendingRecords(null)}
+                  >
+                    取消
+                  </button>
+                </div>
+              </div>
+            )}
             <a
               className="source-link"
               href={publicUrl("photo-sources.json")}
@@ -701,7 +846,7 @@ export default function App() {
                 />
               </label>
               <small className="muted">
-                记录保存在当前浏览器，可在设置中导出。
+                记录保存在当前浏览器，可在设置中导出或导入 JSON。
               </small>
             </div>
             <footer className="modal-footer">

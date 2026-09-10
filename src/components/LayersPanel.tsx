@@ -22,6 +22,7 @@ export default function LayersPanel({
   onFocus,
   onPanorama,
   onImport,
+  importEnabled = true,
   onBack,
   notify,
 }: {
@@ -31,6 +32,8 @@ export default function LayersPanel({
   onFocus: (l: Layer) => void;
   onPanorama: (l: Layer) => void;
   onImport: () => void;
+  /** False on static Pages (no Express upload API). */
+  importEnabled?: boolean;
   onBack: () => void;
   notify: (s: string) => void;
 }) {
@@ -72,10 +75,18 @@ export default function LayersPanel({
         <span>{layers.length}</span>
       </div>
       <p className="panel-description">属于你的建筑、山河与街角。</p>
-      <button className="outline-button full-width" onClick={onImport}>
+      <button
+        className="outline-button full-width"
+        onClick={onImport}
+        disabled={!importEnabled}
+        title={importEnabled ? undefined : "完整导入能力请本机 npm start"}
+      >
         <Plus size={18} />
         导入内容
       </button>
+      {!importEnabled && (
+        <p className="import-disabled-tip">完整导入能力请本机 npm start</p>
+      )}
       {!layers.length ? (
         <div className="empty-state">
           <Layers size={38} />
