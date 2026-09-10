@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowLeft,
   ArrowUpRight,
@@ -30,6 +30,7 @@ export default function PlaceDetail({
   onCheckin,
   onFly,
   onImport,
+  importEnabled = true,
 }: {
   place: Place;
   favorite: boolean;
@@ -39,12 +40,33 @@ export default function PlaceDetail({
   onCheckin: () => void;
   onFly: () => void;
   onImport: () => void;
+  /** False on static Pages (no Express upload API). */
+  importEnabled?: boolean;
 }) {
   const [tab, setTab] = useState<"intro" | "nearby">("intro");
   const [showAlbum, setShowAlbum] = useState(false);
+  /** `trying` loads iframe; `blocked` falls back to open-only card. */
+  const [embedState, setEmbedState] = useState<"idle" | "trying" | "ok" | "blocked">(
+    "idle",
+  );
   const albumUrl = getHeritageAlbumUrl(place.id);
   const search = (q: string) =>
     `https://uri.amap.com/search?keyword=${encodeURIComponent(q)}&city=${encodeURIComponent(place.region.split(" · ")[1])}&view=map&src=shanhai-earth`;
+
+  useEffect(() => {
+    setShowAlbum(false);
+    setEmbedState("idle");
+  }, [place.id]);
+
+  useEffect(() => {
+    if (!showAlbum || embedState !== "trying") return;
+    /** Cross-origin X-Frame blocks often still fire load; treat long blank as blocked. */
+    const timer = window.setTimeout(() => {
+      setEmbedState((s) => (s === "trying" ? "blocked" : s));
+    }, 3500);
+    return () => window.clearTimeout(timer);
+  }, [showAlbum, embedState, albumUrl]);
+
   return (
     <div className="detail-view">
       <div className="detail-photo">
@@ -138,20 +160,80 @@ export default function PlaceDetail({
                 <button
                   type="button"
                   className="heritage-embed-toggle"
-                  onClick={() => setShowAlbum((v) => !v)}
+                  onClick={() => {
+                    if (showAlbum) {
+                      setShowAlbum(false);
+                      setEmbedState("idle");
+                    } else {
+                      setShowAlbum(true);
+                      setEmbedState("idle");
+                    }
+                  }}
                   aria-expanded={showAlbum}
                 >
-                  {showAlbum ? "收起内嵌预览" : "在此预览相册"}
+                  {showAlbum ? "收起预览" : "预览相册卡片"}
                 </button>
                 {showAlbum && (
-                  <iframe
-                    className="heritage-iframe"
-                    title={`${place.name}旅行相册`}
-                    src={albumUrl}
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                  />
+                  <div className="heritage-fallback">
+                    <img
+                      src={publicUrl(place.image)}
+                      alt=""
+                      className="heritage-fallback-thumb"
+                    />
+                    <div>
+                      <strong>{place.name} · 旅行相册</strong>
+                      <p>
+                        内嵌预览可能被相册站点的安全策略拦截；优先在新标签页打开完整相册。
+                      </p>
+                      <a href={albumUrl} target="_blank" rel="noreferrer">
+                        打开旅行相册 <ArrowUpRight size={14} />
+                      </a>
+                      {embedState === "idle" && (
+                        <button
+                          type="button"
+                          className="heritage-embed-try"
+                          onClick={() => setEmbedState("trying")}
+                        >
+                          仍尝试内嵌（可能失败）
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 )}
+                {showAlbum && embedState === "blocked" && (
+                  <p className="heritage-embed-error" role="status">
+                    内嵌被拦截或加载失败，请使用「打开旅行相册」。
+                  </p>
+                )}
+                {showAlbum &&
+                  (embedState === "trying" || embedState === "ok") && (
+                    <iframe
+                      className="heritage-iframe"
+                      title={`${place.name}旅行相册`}
+                      src={albumUrl}
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      onLoad={(e) => {
+                        try {
+                          const win = e.currentTarget.contentWindow;
+                          if (!win) {
+                            setEmbedState("blocked");
+                            return;
+                          }
+                          const href = win.location.href;
+                          if (!href || href === "about:blank") {
+                            setEmbedState("blocked");
+                            return;
+                          }
+                          setEmbedState("ok");
+                        } catch {
+                          /** Cross-origin document loaded → framing allowed. */
+                          setEmbedState("ok");
+                        }
+                      }}
+                      onError={() => setEmbedState("blocked")}
+                    />
+                  )}
               </div>
             )}
             <section className="hours">
@@ -168,13 +250,24 @@ export default function PlaceDetail({
                 <small>资料核对：{place.verified} · 非实时营业状态</small>
               )}
             </section>
-            <button className="panorama-link" onClick={onImport}>
+            <button
+              className="panorama-link"
+              onClick={onImport}
+              disabled={!importEnabled}
+              title={
+                importEnabled ? undefined : "完整导入能力请本机 npm start"
+              }
+            >
               <span className="round-icon">
                 <Camera size={20} />
               </span>
               <span>
                 <strong>换个视角，看这里</strong>
-                <small>导入你拍摄的 720° 全景</small>
+                <small>
+                  {importEnabled
+                    ? "导入你拍摄的 720° 全景"
+                    : "完整导入能力请本机 npm start"}
+                </small>
               </span>
               <ArrowUpRight size={18} />
             </button>

@@ -1,6 +1,7 @@
 # Build Vite app and publish to GitHub Pages (project site).
-# Private-repo note: Free GitHub does not host Pages for private repos;
-# make the repo public or use GitHub Pro, then enable Pages → GitHub Actions.
+# Public repo: https://xtzhou960821.github.io/3D-Earth/
+# Enable Settings → Pages → Source = GitHub Actions.
+# Optional secret VITE_CESIUM_ION_TOKEN: when absent, build still succeeds (base globe only).
 name: Deploy GitHub Pages
 
 on:

@@ -911,6 +911,86 @@ small {
   border-radius: 10px;
   background: #0d181b;
 }
+.heritage-fallback {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid #30494e;
+  border-radius: 10px;
+  background: #122226;
+}
+.heritage-fallback-thumb {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.heritage-fallback strong {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+}
+.heritage-fallback p {
+  font-size: 10px;
+  color: #8ea9ad;
+  line-height: 1.6;
+  margin: 6px 0 8px;
+}
+.heritage-fallback a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--accent);
+}
+.heritage-embed-try {
+  display: block;
+  margin-top: 8px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #9eb8bc;
+  font-size: 11px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.heritage-embed-error {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #d6b9ad;
+  line-height: 1.6;
+}
+.import-disabled-tip {
+  margin: 6px 2px 0;
+  font-size: 10px;
+  color: #8ea9ad;
+  line-height: 1.5;
+}
+.records-import-confirm {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid #3a555a;
+  border-radius: 10px;
+  background: #152428;
+}
+.records-import-confirm p {
+  font-size: 11px;
+  color: #c5d6da;
+  line-height: 1.7;
+}
+.records-import-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  align-items: center;
+}
+.panorama-link:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
 .panorama-link > span:nth-child(2),
 .heritage-link > span:nth-child(2) {
   flex: 1;

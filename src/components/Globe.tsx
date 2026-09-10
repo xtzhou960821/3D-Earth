@@ -10,6 +10,7 @@ import type { Layer, MapHandle, Place } from "../types";
 import { places } from "../data/places";
 import { api } from "../lib/api";
 import { publicUrl } from "../lib/publicUrl";
+import { classifyOsmBuildingsError } from "../lib/ionStatus";
 interface Props {
   selected: Place | null;
   visibleIds: string[];
@@ -19,6 +20,8 @@ interface Props {
   onStatus: (s: string) => void;
   onLayerStatus: (id: string, status: string) => void;
   onCamera: (height: number) => void;
+  /** Called when OSM Buildings fail so the parent can turn the toggle off. */
+  onBuildingsFailed?: (message: string) => void;
   terrain: boolean;
   buildings: boolean;
   labels: boolean;
@@ -339,6 +342,13 @@ export const Globe = forwardRef<MapHandle, Props>(function Globe(props, ref) {
       return;
     }
     if (props.buildings) {
+      const hasIonToken = Boolean(C.Ion.defaultAccessToken);
+      if (!hasIonToken) {
+        const message = classifyOsmBuildingsError(null, false);
+        latest.current.onStatus(message);
+        latest.current.onBuildingsFailed?.(message);
+        return;
+      }
       latest.current.onStatus("正在加载 OSM 建筑");
       C.createOsmBuildingsAsync()
         .then((t) => {
@@ -351,9 +361,11 @@ export const Globe = forwardRef<MapHandle, Props>(function Globe(props, ref) {
           latest.current.onStatus("OSM 建筑已加载");
           request();
         })
-        .catch(() => {
-          if (!cancelled)
-            latest.current.onStatus("建筑数据加载失败，请检查 ion 资源权限");
+        .catch((err) => {
+          if (cancelled) return;
+          const message = classifyOsmBuildingsError(err, true);
+          latest.current.onStatus(message);
+          latest.current.onBuildingsFailed?.(message);
         });
     }
     return () => {
