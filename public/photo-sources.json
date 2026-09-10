@@ -115,5 +115,75 @@
     "author": "Pavel Špindler",
     "license": "CC BY 3.0",
     "licenseUrl": "https://creativecommons.org/licenses/by/3.0"
+  },
+  {
+    "id": "helan",
+    "page": "https://en.wikipedia.org/wiki/Helan_Mountains",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/AlshaaBaruunHiid.jpg/330px-AlshaaBaruunHiid.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "bytes": 21922,
+    "filePage": "https://commons.wikimedia.org/wiki/File:AlshaaBaruunHiid.jpg",
+    "author": "Yaan",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0"
+  },
+  {
+    "id": "xixia",
+    "page": "https://en.wikipedia.org/wiki/Western_Xia_mausoleums",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Xi_Xia_Imperial_Tombs_%2854154641924%29.jpg/330px-Xi_Xia_Imperial_Tombs_%2854154641924%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "bytes": 26753,
+    "filePage": "https://commons.wikimedia.org/wiki/File:Xi_Xia_Imperial_Tombs_%2854154641924%29.jpg",
+    "author": "xiquinhosilva",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0"
+  },
+  {
+    "id": "baota",
+    "page": "https://en.wikipedia.org/wiki/Baota_District",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/%E5%AE%9D%E5%A1%94%E5%B1%B1_2.jpg/330px-%E5%AE%9D%E5%A1%94%E5%B1%B1_2.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "bytes": 33444,
+    "filePage": "https://commons.wikimedia.org/wiki/File:%E5%AE%9D%E5%A1%94%E5%B1%B1_2.jpg",
+    "author": "Liuxingy",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  {
+    "id": "hukou",
+    "page": "https://en.wikipedia.org/wiki/Hukou_Waterfalls",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Hukou_Waterfall.jpg/330px-Hukou_Waterfall.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "bytes": 28836,
+    "filePage": "https://commons.wikimedia.org/wiki/File:Hukou_Waterfall.jpg",
+    "author": "Leruswing",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0"
+  },
+  {
+    "id": "ali",
+    "page": "https://en.wikipedia.org/wiki/Ngari_Prefecture",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Gurla_Mandhata_%26_Manasarovar.jpg/330px-Gurla_Mandhata_%26_Manasarovar.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "bytes": 19030,
+    "filePage": "https://commons.wikimedia.org/wiki/File:Gurla_Mandhata_%26_Manasarovar.jpg",
+    "author": "Jean-Marie Hullot",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  {
+    "id": "chengdu",
+    "page": "https://en.wikipedia.org/wiki/Chengdu",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/%E9%9B%AA%E5%B1%B1%E4%B8%8B%E7%9A%84%E6%88%90%E9%83%BD%E5%B8%82%E5%A4%A9%E9%99%85%E7%BA%BF_Chengdu_skyline_with_snow_capped_mountains.jpg/330px-%E9%9B%AA%E5%B1%B1%E4%B8%8B%E7%9A%84%E6%88%90%E9%83%BD%E5%B8%82%E5%A4%A9%E9%99%85%E7%BA%BF_Chengdu_skyline_with_snow_capped_mountains.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "bytes": 16286,
+    "filePage": "https://commons.wikimedia.org/wiki/File:%E9%9B%AA%E5%B1%B1%E4%B8%8B%E7%9A%84%E6%88%90%E9%83%BD%E5%B8%82%E5%A4%A9%E9%99%85%E7%BA%BF_Chengdu_skyline_with_snow_capped_mountains.jpg",
+    "author": "FISU",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0"
+  },
+  {
+    "id": "wuyuan",
+    "page": "https://en.wikipedia.org/wiki/Wuyuan_County,_Jiangxi",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Wuyuan_jiangling.jpg/330px-Wuyuan_jiangling.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "bytes": 33862,
+    "filePage": "https://commons.wikimedia.org/wiki/File:Wuyuan_jiangling.jpg",
+    "author": "YaPEX",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0"
   }
 ]
