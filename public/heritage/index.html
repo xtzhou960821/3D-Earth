@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>旅行相册入口 · 山海 Earth</title>
+    <meta
+      name="description"
+      content="轻量入口页：相册托管在公开站 xixia-heritage，本页仅提供深链，不镜像图片。"
+    />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0c171c;
+        --panel: #142428;
+        --text: #e7f0f2;
+        --muted: #8ea9ad;
+        --accent: #c9a46a;
+        --line: #2a4146;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Noto Serif SC", "Songti SC", Georgia, serif;
+        background:
+          radial-gradient(ellipse at top, #1a3036 0%, transparent 55%),
+          linear-gradient(160deg, #0c171c, #132226 60%, #0a1215);
+        color: var(--text);
+      }
+      main {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 48px 20px 64px;
+      }
+      h1 {
+        font-size: clamp(1.6rem, 4vw, 2.2rem);
+        font-weight: 600;
+        margin: 0 0 12px;
+      }
+      .lead {
+        color: var(--muted);
+        line-height: 1.7;
+        margin: 0 0 28px;
+        font-family: "Noto Sans SC", system-ui, sans-serif;
+        font-size: 0.95rem;
+      }
+      .note {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        padding: 14px 16px;
+        border-radius: 10px;
+        color: var(--muted);
+        font-family: "Noto Sans SC", system-ui, sans-serif;
+        font-size: 0.85rem;
+        line-height: 1.6;
+        margin-bottom: 28px;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 10px;
+      }
+      a {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: baseline;
+        text-decoration: none;
+        color: var(--text);
+        border: 1px solid var(--line);
+        background: rgba(20, 36, 40, 0.85);
+        border-radius: 10px;
+        padding: 14px 16px;
+      }
+      a:hover {
+        border-color: var(--accent);
+      }
+      a strong {
+        font-weight: 600;
+      }
+      a span {
+        color: var(--muted);
+        font-family: "Noto Sans SC", system-ui, sans-serif;
+        font-size: 0.8rem;
+      }
+      .back {
+        display: inline-block;
+        margin-bottom: 28px;
+        color: var(--accent);
+        font-family: "Noto Sans SC", system-ui, sans-serif;
+        font-size: 0.9rem;
+        border: none;
+        background: none;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <a class="back" href="../">← 返回山海 Earth</a>
+      <h1>旅行相册入口</h1>
+      <p class="lead">
+        相册托管在公开站
+        <a
+          href="https://xtzhou960821.github.io/xixia-heritage/"
+          style="display: inline; border: none; background: none; padding: 0; color: var(--accent)"
+          >xtzhou960821.github.io/xixia-heritage</a
+        >。本页只做深链索引，不复制图片或完整相册 HTML。
+      </p>
+      <p class="note">
+        体积说明：完整 images/ 约 860MB，不会并入 3D-Earth。若私有仓库无法启用
+        GitHub Pages，仍可继续使用上述公开相册 URL；本仓库本地
+        Express/Cesium 工作站路径不受影响。
+      </p>
+      <ul>
+        <li>
+          <a href="https://xtzhou960821.github.io/xixia-heritage/"
+            ><strong>相册首页</strong><span>全部旅程</span></a
+          >
+        </li>
+        <li>
+          <a href="https://xtzhou960821.github.io/xixia-heritage/huangshan.html"
+            ><strong>黄山</strong><span>地球目的地互链</span></a
+          >
+        </li>
+        <li>
+          <a
+            href="https://xtzhou960821.github.io/xixia-heritage/tibet-lhasa.html"
+            ><strong>拉萨 · 布达拉宫</strong><span>地球目的地互链</span></a
+          >
+        </li>
+        <li>
+          <a
+            href="https://xtzhou960821.github.io/xixia-heritage/helan-mountain.html"
+            ><strong>贺兰山</strong><span>公开相册</span></a
+          >
+        </li>
+        <li>
+          <a href="https://xtzhou960821.github.io/xixia-heritage/xixia-tomb.html"
+            ><strong>西夏陵</strong><span>公开相册</span></a
+          >
+        </li>
+        <li>
+          <a
+            href="https://xtzhou960821.github.io/xixia-heritage/baota-mountain.html"
+            ><strong>宝塔山</strong><span>公开相册</span></a
+          >
+        </li>
+        <li>
+          <a
+            href="https://xtzhou960821.github.io/xixia-heritage/hukou-waterfall.html"
+            ><strong>壶口瀑布</strong><span>公开相册</span></a
+          >
+        </li>
+        <li>
+          <a href="https://xtzhou960821.github.io/xixia-heritage/tibet-ali.html"
+            ><strong>西藏阿里</strong><span>公开相册</span></a
+          >
+        </li>
+        <li>
+          <a href="https://xtzhou960821.github.io/xixia-heritage/chengdu.html"
+            ><strong>成都</strong><span>公开相册</span></a
+          >
+        </li>
+        <li>
+          <a href="https://xtzhou960821.github.io/xixia-heritage/wuyuan.html"
+            ><strong>婺源</strong><span>公开相册</span></a
+          >
+        </li>
+      </ul>
+    </main>
+  </body>
+</html>

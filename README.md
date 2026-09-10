@@ -16,6 +16,50 @@ npm start
 
 Cesium ion 令牌已经配置在 `.env`，该文件被版本控制忽略。新机器请参考 `.env.example` 设置 `CESIUM_ION_TOKEN`。这是 Cesium 浏览器客户端需要读取的令牌，会通过本机 `/api/config` 发送给浏览器；并非对浏览器使用者保密的服务端密钥。它不会写入前端打包产物。发布到公网前应使用仅能读取所需资源、限制来源的客户端令牌。
 
+## 旅行相册（深链，不镜像图片）
+
+相册与全部图片继续托管在公开站 [xixia-heritage Pages](https://xtzhou960821.github.io/xixia-heritage/)。**不会**把约 860MB 的 `images/`（或完整相册 HTML）打进本仓库。
+
+| 入口 | 说明 |
+| --- | --- |
+| 景点详情「打开旅行相册」 | `src/data/heritageAlbums.ts`：place id → 公开 URL；可选内嵌 iframe 预览 |
+| 轻量索引 | `/heritage/`（`public/heritage/index.html`）仅向外深链 |
+| 公开相册本体 | https://xtzhou960821.github.io/xixia-heritage/ |
+
+已匹配互链（未捏造其它对应）：
+
+- **黄山** → `…/huangshan.html`
+- **布达拉宫** → `…/tibet-lhasa.html`
+
+本地：http://127.0.0.1:5173/heritage/ 或 http://127.0.0.1:3001/heritage/
+
+## GitHub Pages
+
+工作流：`.github/workflows/pages.yml`（`npm ci && npm run build`，发布 `dist`）。
+
+### 私有仓库限制与取舍（重要）
+
+当前 `3D-Earth` 为 **private**。GitHub Free **通常不能**为私有仓库托管 Pages。可选：
+
+1. **将仓库设为 public**，启用 Actions Pages → `https://xtzhou960821.github.io/3D-Earth/`（地球静态壳 + `/heritage/` 深链索引；相册仍走 xixia 公开站）
+2. **GitHub Pro / Team**，保留私有并启用 Pages
+3. **不启用 3D-Earth Pages**：本机继续 `npm start`；相册始终可用公开 URL。地球深链不受影响。
+
+取舍：方案 1/2 便于分享静态地球浏览；无 Express 时图层上传不可用。方案 3 零可见性变更，完整工作站能力仍在本机。
+
+然后（若选 1/2）：Settings → Pages → Source = **GitHub Actions**，合并到 `main` 或 `workflow_dispatch`。
+
+### Pages 相对本机工作站的能力降级
+
+| 能力 | 本机 `npm run dev` / `npm start` | GitHub Pages（若启用） |
+| --- | --- | --- |
+| 三维地球浏览 / 目的地 / 相册深链 | ✅ | ✅（相册内容在 xixia 公开 Pages） |
+| `/api/layers` 上传、持久化、删除 | ✅ Express | ❌ 无后端 |
+| Cesium ion 令牌 | `.env` → `/api/config` | 可选 Secret `VITE_CESIUM_ION_TOKEN`（写入前端包；请用受限客户端令牌） |
+| 未配置 ion | 基础地球 | 基础地球（NaturalEarthII） |
+
+本地路径保持不变：继续用 Express + Vite 做完整工作站体验。
+
 ## 已实现
 
 - 全屏三维地球、卫星影像、真实地形、可选 OSM 建筑、缩放、正北和倾斜视角。
@@ -26,6 +70,8 @@ Cesium ion 令牌已经配置在 `.env`，该文件被版本控制忽略。新�
 - 每个景点提供一间有公开来源的具体酒店参考、周边住宿区域与地方美食查询入口，点击查看酒店资料或在高德地图搜索。**当前不包含内嵌的实时酒店房价、餐厅评分和商户 POI 列表。**
 - 本地模型 / 全景文件持久化、图层加载状态、隐藏显示、定位、模型经纬度 / 高程 / 旋转 / 比例调整、删除。
 - 桌面布局与手机折叠侧栏、键盘可用的对话框和全景转动。
+- 旅行相册深链（`heritageAlbums` 映射 + `/heritage/` 轻量索引），黄山 / 布达拉宫可打开公开站相册。
+
 
 ## 导入格式
 
@@ -75,4 +121,4 @@ npm run build
 
 Cesium ion 网络不可用时优先保留内置基础地球，并在界面提示。此应用并不包含 Google Earth 的专有摄影测量模型或 Street View 数据。景点酒店美食入口不是酒店预订系统，也不提供实时房态。
 
-此版本不含账号系统、跨设备同步、共享权限、自动 BIM 切片服务或地图商用发布配置。没有自动发布到公网。
+此版本不含账号系统、跨设备同步、共享权限、自动 BIM 切片服务或地图商用发布配置。完整图层上传能力仍依赖本机 Express；GitHub Pages 仅承载静态浏览（见上文降级表）。
