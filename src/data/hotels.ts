@@ -72,4 +72,39 @@ export const hotels: Record<string, HotelReference> = {
     source:
       "https://www.ihg.com.cn/intercontinental/hotels/cn/zh/lijiang/ljgac/hoteldetail",
   },
+  helan: {
+    name: "银川凯宾斯基饭店",
+    area: "金凤区 · 前往贺兰山需乘车",
+    source: "https://www.kempinski.com/cn/kempinski-hotel-yinchuan",
+  },
+  xixia: {
+    name: "银川希尔顿酒店",
+    area: "金凤区 · 前往西夏陵需乘车",
+    source: "https://www.hilton.com.cn/zh-CN/hotels/incychi-hilton-yinchuan/",
+  },
+  baota: {
+    name: "如家酒店（延安宝塔山万达广场店）",
+    area: "宝塔区 · 邻近宝塔山与城区",
+    source: "https://www.bthhotels.com/hotel/091105",
+  },
+  hukou: {
+    name: "延安宝塔山景区慧泽山庄华驿精选酒店",
+    area: "延安城区 · 前往壶口瀑布需乘车",
+    source: "https://www.bthhotels.com/hotel/AY1773",
+  },
+  ali: {
+    name: "拉萨香格里拉（进藏中转参考）",
+    area: "拉萨市区 · 阿里行程常经拉萨中转",
+    source: "https://www.shangri-la.com/cn/lhasa/shangrila/about/",
+  },
+  chengdu: {
+    name: "成都香格里拉大酒店",
+    area: "锦江滨河 · 成都城区",
+    source: "https://www.shangri-la.com/cn/chengdu/shangrila/about/",
+  },
+  wuyuan: {
+    name: "篁岭景区住宿（竹山度假方向）",
+    area: "婺源篁岭 · 景区内/近景区住宿",
+    source: "https://www.wyhl.cc/",
+  },
 };

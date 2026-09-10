@@ -12,6 +12,13 @@ export const HERITAGE_PAGES_BASE =
 export const heritageAlbums: Readonly<Record<string, string>> = {
   huangshan: `${HERITAGE_PAGES_BASE}/huangshan.html`,
   potala: `${HERITAGE_PAGES_BASE}/tibet-lhasa.html`,
+  helan: `${HERITAGE_PAGES_BASE}/helan-mountain.html`,
+  xixia: `${HERITAGE_PAGES_BASE}/xixia-tomb.html`,
+  baota: `${HERITAGE_PAGES_BASE}/baota-mountain.html`,
+  hukou: `${HERITAGE_PAGES_BASE}/hukou-waterfall.html`,
+  ali: `${HERITAGE_PAGES_BASE}/tibet-ali.html`,
+  chengdu: `${HERITAGE_PAGES_BASE}/chengdu.html`,
+  wuyuan: `${HERITAGE_PAGES_BASE}/wuyuan.html`,
 };
 
 /**
@@ -29,22 +36,50 @@ export const heritageCatalog: ReadonlyArray<{
   href: string;
   note?: string;
 }> = [
-  { title: "相册首页", href: `${HERITAGE_PAGES_BASE}/` },
+  { title: "相册首页", href: `${HERITAGE_PAGES_BASE}/`, note: "全部旅程" },
   {
     title: "黄山",
     href: `${HERITAGE_PAGES_BASE}/huangshan.html`,
-    note: "对应地球目的地「黄山」",
+    note: "地球目的地互链",
   },
   {
     title: "拉萨 · 布达拉宫",
     href: `${HERITAGE_PAGES_BASE}/tibet-lhasa.html`,
-    note: "对应地球目的地「布达拉宫」",
+    note: "地球目的地互链",
   },
-  { title: "贺兰山", href: `${HERITAGE_PAGES_BASE}/helan-mountain.html` },
-  { title: "西夏陵", href: `${HERITAGE_PAGES_BASE}/xixia-tomb.html` },
-  { title: "宝塔山", href: `${HERITAGE_PAGES_BASE}/baota-mountain.html` },
-  { title: "壶口瀑布", href: `${HERITAGE_PAGES_BASE}/hukou-waterfall.html` },
-  { title: "西藏阿里", href: `${HERITAGE_PAGES_BASE}/tibet-ali.html` },
-  { title: "成都", href: `${HERITAGE_PAGES_BASE}/chengdu.html` },
-  { title: "婺源", href: `${HERITAGE_PAGES_BASE}/wuyuan.html` },
+  {
+    title: "贺兰山",
+    href: `${HERITAGE_PAGES_BASE}/helan-mountain.html`,
+    note: "地球目的地互链",
+  },
+  {
+    title: "西夏陵",
+    href: `${HERITAGE_PAGES_BASE}/xixia-tomb.html`,
+    note: "地球目的地互链",
+  },
+  {
+    title: "宝塔山",
+    href: `${HERITAGE_PAGES_BASE}/baota-mountain.html`,
+    note: "地球目的地互链",
+  },
+  {
+    title: "壶口瀑布",
+    href: `${HERITAGE_PAGES_BASE}/hukou-waterfall.html`,
+    note: "地球目的地互链",
+  },
+  {
+    title: "西藏阿里",
+    href: `${HERITAGE_PAGES_BASE}/tibet-ali.html`,
+    note: "地球目的地互链",
+  },
+  {
+    title: "成都",
+    href: `${HERITAGE_PAGES_BASE}/chengdu.html`,
+    note: "地球目的地互链",
+  },
+  {
+    title: "婺源",
+    href: `${HERITAGE_PAGES_BASE}/wuyuan.html`,
+    note: "地球目的地互链",
+  },
 ];
