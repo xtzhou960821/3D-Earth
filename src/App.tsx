@@ -38,6 +38,7 @@ import Modal from "./components/Modal";
 import { places } from "./data/places";
 import type { Category, CheckIn, Layer, MapHandle, Place } from "./types";
 import { api, persist, readStorage } from "./lib/api";
+import { publicUrl } from "./lib/publicUrl";
 const ImportDialog = lazy(() => import("./components/ImportDialog"));
 const Panorama = lazy(() => import("./components/Panorama"));
 const categories = ["全部", "自然风光", "人文古迹", "城市漫游"] as const;
@@ -86,7 +87,12 @@ export default function App() {
   useEffect(() => {
     api<Layer[]>("/layers")
       .then(setLayers)
-      .catch(() => notify("内容库连接失败，请确认本地服务已启动"));
+      .catch(() => {
+        // Static Pages builds have no Express `/api/layers`; keep browsing without toast noise.
+        if (import.meta.env.VITE_CESIUM_ION_TOKEN !== undefined || import.meta.env.BASE_URL !== "/")
+          return;
+        notify("内容库连接失败，请确认本地服务已启动");
+      });
   }, [notify]);
   useEffect(() => {
     if (!toast) return;
@@ -325,7 +331,11 @@ export default function App() {
                       className="destination-main"
                       onClick={() => select(p)}
                     >
-                      <img src={p.image} alt={p.name} loading="lazy" />
+                      <img
+                        src={publicUrl(p.image)}
+                        alt={p.name}
+                        loading="lazy"
+                      />
                       <span className="destination-text">
                         <strong>{p.name}</strong>
                         <span className="destination-location">
@@ -648,7 +658,7 @@ export default function App() {
             </button>
             <a
               className="source-link"
-              href="/photo-sources.json"
+              href={publicUrl("photo-sources.json")}
               target="_blank"
               rel="noreferrer"
             >

@@ -11,9 +11,15 @@ import {
   Utensils,
   ExternalLink,
   Camera,
+  Images,
 } from "lucide-react";
 import type { CheckIn, Place } from "../types";
 import { hotels } from "../data/hotels";
+import { publicUrl } from "../lib/publicUrl";
+
+/**
+ * Destination detail panel: intro, nearby lodging, optional heritage album link.
+ */
 export default function PlaceDetail({
   place,
   favorite,
@@ -39,7 +45,7 @@ export default function PlaceDetail({
   return (
     <div className="detail-view">
       <div className="detail-photo">
-        <img src={place.image} alt={place.name} />
+        <img src={publicUrl(place.image)} alt={place.name} />
         <div className="detail-photo-shade" />
         <button
           className="photo-back icon-button"
@@ -109,6 +115,23 @@ export default function PlaceDetail({
                 <span key={h}>{h}</span>
               ))}
             </div>
+            {place.heritageAlbum && (
+              <a
+                className="heritage-link"
+                href={publicUrl(place.heritageAlbum)}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <span className="round-icon">
+                  <Images size={20} />
+                </span>
+                <span>
+                  <strong>打开旅行相册</strong>
+                  <small>查看本目的地实拍图集（静态子站）</small>
+                </span>
+                <ArrowUpRight size={18} />
+              </a>
+            )}
             <section className="hours">
               <div>
                 <Clock size={18} />

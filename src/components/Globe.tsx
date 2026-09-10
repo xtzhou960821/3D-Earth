@@ -9,6 +9,7 @@ import * as C from "cesium";
 import type { Layer, MapHandle, Place } from "../types";
 import { places } from "../data/places";
 import { api } from "../lib/api";
+import { publicUrl } from "../lib/publicUrl";
 interface Props {
   selected: Place | null;
   visibleIds: string[];
@@ -192,7 +193,7 @@ export const Globe = forwardRef<MapHandle, Props>(function Globe(props, ref) {
           destination: C.Cartesian3.fromDegrees(105, 32, 9500000),
         });
         const natural = await C.TileMapServiceImageryProvider.fromUrl(
-          "/cesium/Assets/Textures/NaturalEarthII",
+          publicUrl("cesium/Assets/Textures/NaturalEarthII"),
         );
         if (disposed) return;
         v.imageryLayers.addImageryProvider(natural);
@@ -247,11 +248,18 @@ export const Globe = forwardRef<MapHandle, Props>(function Globe(props, ref) {
         );
         v.camera.percentageChanged = 0.03;
         latest.current.onStatus("基础地球已就绪 · 正在连接卫星影像");
-        const config = await api<{ ionToken: string }>("/config");
+        /** Prefer local Express `/api/config`; fall back to build-time Pages env. */
+        let ionToken = import.meta.env.VITE_CESIUM_ION_TOKEN || "";
+        try {
+          const config = await api<{ ionToken: string }>("/config");
+          if (config.ionToken) ionToken = config.ionToken;
+        } catch {
+          /* static host / Pages: no Express API */
+        }
         if (disposed) return;
-        C.Ion.defaultAccessToken = config.ionToken;
+        C.Ion.defaultAccessToken = ionToken;
         setReady(true);
-        if (!config.ionToken) {
+        if (!ionToken) {
           latest.current.onStatus("基础地球模式 · 未配置 Cesium ion");
           return;
         }

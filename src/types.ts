@@ -19,6 +19,11 @@ export interface Place {
   highlights: string[];
   stay: string[];
   food: string[];
+  /**
+   * Optional travel-album page under `/heritage/` (static sub-site).
+   * Path is site-relative without leading slash, e.g. `heritage/huangshan.html`.
+   */
+  heritageAlbum?: string;
 }
 export interface Layer {
   id: string;

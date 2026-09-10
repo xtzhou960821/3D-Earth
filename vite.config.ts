@@ -2,7 +2,15 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 
+/**
+ * Site base path. Local Express/Vite use `/`.
+ * GitHub project Pages uses `/3D-Earth/` via `VITE_BASE` in CI.
+ */
+const base = process.env.VITE_BASE || "/";
+const cesiumBase = `${base.endsWith("/") ? base : `${base}/`}cesium`;
+
 export default defineConfig({
+  base,
   plugins: [
     react(),
     viteStaticCopy({
@@ -20,7 +28,7 @@ export default defineConfig({
       ],
     }),
   ],
-  define: { CESIUM_BASE_URL: JSON.stringify("/cesium") },
+  define: { CESIUM_BASE_URL: JSON.stringify(cesiumBase) },
   server: {
     port: 5173,
     proxy: {

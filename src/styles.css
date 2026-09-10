@@ -866,7 +866,8 @@ small {
   color: #7f959f;
   margin: 10px 0 0 27px;
 }
-.panorama-link {
+.panorama-link,
+.heritage-link {
   display: flex;
   width: 100%;
   text-align: left;
@@ -876,16 +877,24 @@ small {
   padding: 15px 12px;
   margin: 24px 0 16px;
   gap: 10px;
+  color: inherit;
+  text-decoration: none;
 }
-.panorama-link > span:nth-child(2) {
+.heritage-link {
+  margin: 8px 0 0;
+}
+.panorama-link > span:nth-child(2),
+.heritage-link > span:nth-child(2) {
   flex: 1;
 }
-.panorama-link strong {
+.panorama-link strong,
+.heritage-link strong {
   display: block;
   font-size: 12px;
   font-weight: 500;
 }
-.panorama-link small {
+.panorama-link small,
+.heritage-link small {
   display: block;
   font-size: 10px;
   color: #8ea9ad;
@@ -894,7 +903,8 @@ small {
 .round-icon {
   color: var(--accent);
 }
-.panorama-link > svg {
+.panorama-link > svg,
+.heritage-link > svg {
   color: var(--accent);
 }
 .detail-coordinates {

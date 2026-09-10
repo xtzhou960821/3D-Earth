@@ -16,6 +16,60 @@ npm start
 
 Cesium ion 令牌已经配置在 `.env`，该文件被版本控制忽略。新机器请参考 `.env.example` 设置 `CESIUM_ION_TOKEN`。这是 Cesium 浏览器客户端需要读取的令牌，会通过本机 `/api/config` 发送给浏览器；并非对浏览器使用者保密的服务端密钥。它不会写入前端打包产物。发布到公网前应使用仅能读取所需资源、限制来源的客户端令牌。
 
+## 旅行相册子站 `/heritage/`
+
+已将公开相册站 [xixia-heritage](https://github.com/xtzhou960821/xixia-heritage) 集成为静态子站：
+
+| 环境 | 入口 |
+| --- | --- |
+| 开发 | http://127.0.0.1:5173/heritage/ |
+| 本地生产 | http://127.0.0.1:3001/heritage/ |
+| 独立公开站（图片源） | https://xtzhou960821.github.io/xixia-heritage/ |
+| 本仓库 Pages（启用后） | https://xtzhou960821.github.io/3D-Earth/heritage/ |
+
+地球景点详情中，已匹配相册的目的地会显示「打开旅行相册」：
+
+- **黄山** → `/heritage/huangshan.html`
+- **布达拉宫** → `/heritage/tibet-lhasa.html`（相册页即为拉萨·布达拉宫）
+
+其余相册（贺兰山、西夏陵、壶口、成都、婺源、阿里分站等）可从 `/heritage/` 首页进入；未在地球预设中强行捏造对应关系。
+
+### 体积策略（为何不用整包图片）
+
+完整 `images/` 约 **860MB**。本仓库采用 **方案 b**：
+
+1. 仅复制 HTML / CSS / JS 到 `public/heritage/`（约 200KB）
+2. 将相对 `images/...` 改写为绝对地址 `https://xtzhou960821.github.io/xixia-heritage/images/...`
+3. 相册版式与页面完整保留；浏览图片需能访问上述公开 Pages
+
+备选：若要坚持离线整包图片，可用 `git submodule` 把 `xixia-heritage` 挂到 `public/heritage`（需自行 `git submodule update --init`），但会显著增大仓库体积，不适合作为默认 PR 策略。详见 `public/heritage/README.md`。
+
+## GitHub Pages
+
+工作流：`.github/workflows/pages.yml`（`npm ci && npm run build`，发布 `dist`，含 `/heritage/`）。
+
+### 私有仓库限制（重要）
+
+当前 `3D-Earth` 为 **private**。GitHub Free 对私有仓库 **通常不能托管 Pages**；需要：
+
+1. 将仓库设为 **public**，或
+2. 使用 **GitHub Pro / Team** 等支持私有 Pages 的方案
+
+然后：Settings → Pages → Source 选 **GitHub Actions**，合并本 PR 到 `main` 或手动 `workflow_dispatch`。
+
+预期站点：`https://xtzhou960821.github.io/3D-Earth/`
+
+### Pages 相对本机工作站的能力降级
+
+| 能力 | 本机 `npm run dev` / `npm start` | GitHub Pages |
+| --- | --- | --- |
+| 三维地球浏览 / 目的地 / 相册子站 | ✅ | ✅（相册图片走 xixia 公开 Pages） |
+| `/api/layers` 上传、持久化、删除 | ✅ Express | ❌ 无后端 |
+| Cesium ion 令牌 | `.env` → `/api/config` | 可选仓库 Secret `VITE_CESIUM_ION_TOKEN`（会打进前端包；请用受限客户端令牌） |
+| 未配置 ion | 基础地球 | 基础地球（NaturalEarthII） |
+
+本地路径保持不变：继续用 Express + Vite 做完整工作站体验。
+
 ## 已实现
 
 - 全屏三维地球、卫星影像、真实地形、可选 OSM 建筑、缩放、正北和倾斜视角。
@@ -26,6 +80,7 @@ Cesium ion 令牌已经配置在 `.env`，该文件被版本控制忽略。新�
 - 每个景点提供一间有公开来源的具体酒店参考、周边住宿区域与地方美食查询入口，点击查看酒店资料或在高德地图搜索。**当前不包含内嵌的实时酒店房价、餐厅评分和商户 POI 列表。**
 - 本地模型 / 全景文件持久化、图层加载状态、隐藏显示、定位、模型经纬度 / 高程 / 旋转 / 比例调整、删除。
 - 桌面布局与手机折叠侧栏、键盘可用的对话框和全景转动。
+- 静态旅行相册子站 `/heritage/`，并与黄山、布达拉宫目的地互链。
 
 ## 导入格式
 
@@ -75,4 +130,4 @@ npm run build
 
 Cesium ion 网络不可用时优先保留内置基础地球，并在界面提示。此应用并不包含 Google Earth 的专有摄影测量模型或 Street View 数据。景点酒店美食入口不是酒店预订系统，也不提供实时房态。
 
-此版本不含账号系统、跨设备同步、共享权限、自动 BIM 切片服务或地图商用发布配置。没有自动发布到公网。
+此版本不含账号系统、跨设备同步、共享权限、自动 BIM 切片服务或地图商用发布配置。完整图层上传能力仍依赖本机 Express；GitHub Pages 仅承载静态浏览（见上文降级表）。
