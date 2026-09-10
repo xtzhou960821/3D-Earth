@@ -1,0 +1,35 @@
+{
+  "name": "shanhai-earth",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k \"node --watch server/index.js\" \"vite --host 127.0.0.1\"",
+    "build": "tsc -b && vite build",
+    "start": "NODE_ENV=production node server/index.js",
+    "test": "node --test server/*.test.js",
+    "typecheck": "tsc -b"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "6.1.1",
+    "cesium": "1.145.0",
+    "concurrently": "10.0.5",
+    "dotenv": "17.4.2",
+    "express": "5.2.1",
+    "lucide-react": "1.41.0",
+    "multer": "2.3.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "three": "0.185.1",
+    "vite": "8.2.2",
+    "vite-plugin-static-copy": "4.1.1",
+    "web-ifc": "0.0.77"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.7",
+    "@types/three": "0.185.4",
+    "prettier": "3.9.6",
+    "typescript": "7.0.2"
+  }
+}
