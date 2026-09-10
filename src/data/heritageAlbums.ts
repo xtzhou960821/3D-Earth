@@ -7,7 +7,11 @@ export const HERITAGE_PAGES_BASE =
 
 /**
  * Earth place id → public album page URL.
- * Only include clear matches; do not invent destinations.
+ * Only map destinations that have a real public `*.html` on xixia-heritage.
+ * Public album pages today: helan-mountain, xixia-tomb, baota-mountain,
+ * hukou-waterfall, tibet-ali, chengdu, huangshan, wuyuan, tibet-lhasa.
+ * No pages (do not invent): palace, greatwall, jiuzhai, westlake,
+ * zhangjiajie, terracotta, guilin, bund, mogao, lijiang, etc.
  */
 export const heritageAlbums: Readonly<Record<string, string>> = {
   huangshan: `${HERITAGE_PAGES_BASE}/huangshan.html`,
