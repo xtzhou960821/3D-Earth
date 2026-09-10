@@ -35,10 +35,23 @@ export interface Layer {
   createdAt: string;
   bytes: number;
   sourceFormat?: string;
+  /** Optional sidecar of IFC/glTF feature metadata (JSON). */
+  propertiesUrl?: string;
+  /** Demo / static layers that cannot be deleted via API. */
+  readOnly?: boolean;
 }
 export interface CheckIn {
   date: string;
   note: string;
+}
+/** Camera pose for share links (degrees + meters). */
+export interface CameraView {
+  longitude: number;
+  latitude: number;
+  height: number;
+  heading: number;
+  pitch: number;
+  roll: number;
 }
 export interface MapHandle {
   flyTo: (place: Place) => void;
@@ -48,4 +61,8 @@ export interface MapHandle {
   north: () => void;
   focusLayer: (layer: Layer) => void;
   getPosition: () => { longitude: number; latitude: number; height: number };
+  /** Current camera pose for share deep links. */
+  getCameraView: () => CameraView;
+  /** Restore a shared camera pose. */
+  setCameraView: (view: CameraView, duration?: number) => void;
 }

@@ -12,12 +12,15 @@ import {
 } from "lucide-react";
 import Modal from "./Modal";
 import type { Layer } from "../types";
-import { api } from "../lib/api";
+import { uploadLayer } from "../lib/api";
 interface Props {
   onClose: () => void;
   onImported: (l: Layer) => void;
   position: { longitude: number; latitude: number; height: number };
 }
+/**
+ * Import dialog for models, tilesets, panoramas, and ion assets.
+ */
 export default function ImportDialog({ onClose, onImported, position }: Props) {
   const [type, setType] = useState<"model" | "tiles" | "panorama" | "ion">(
       "model",
@@ -33,6 +36,7 @@ export default function ImportDialog({ onClose, onImported, position }: Props) {
     [entry, setEntry] = useState(""),
     [busy, setBusy] = useState(false),
     [status, setStatus] = useState(""),
+    [progress, setProgress] = useState<number | null>(null),
     [error, setError] = useState("");
   const fileInput = useRef<HTMLInputElement>(null),
     folderInput = useRef<HTMLInputElement>(null);
@@ -49,6 +53,10 @@ export default function ImportDialog({ onClose, onImported, position }: Props) {
         ? /\.(jpg|jpeg|png|webp)$/i.test(f.name)
         : /\.(glb|gltf|ifc|obj)$/i.test(f.name),
   );
+  /**
+   * Apply a file list selection and guess the entry path.
+   * @param list Files from picker or drop
+   */
   function pick(list: File[]) {
     setFiles(list);
     setError("");
@@ -62,16 +70,26 @@ export default function ImportDialog({ onClose, onImported, position }: Props) {
     setEntry(file?.webkitRelativePath || file?.name || "");
     if (file && !name) setName(file.name.replace(/\.[^.]+$/, ""));
   }
+  /**
+   * Switch import kind and clear the current selection.
+   * @param next Import type tab
+   */
   function changeType(next: typeof type) {
     setType(next);
     setFiles([]);
     setEntry("");
     setError("");
+    setProgress(null);
   }
+  /**
+   * Validate, convert when needed, and upload to the local Express API.
+   * @param e Form submit event
+   */
   async function submit(e: FormEvent) {
     e.preventDefault();
     setError("");
     setBusy(true);
+    setProgress(null);
     try {
       let uploadFiles = files;
       let chosen = files.find(
@@ -79,6 +97,7 @@ export default function ImportDialog({ onClose, onImported, position }: Props) {
       );
       let uploadEntry = entry;
       let sourceFormat = chosen?.name.split(".").pop()?.toUpperCase();
+      let bimProperties: unknown[] | undefined;
       if (type !== "ion" && !chosen)
         throw new Error("请选择对应类型的入口文件");
       if (type === "panorama") {
@@ -89,9 +108,11 @@ export default function ImportDialog({ onClose, onImported, position }: Props) {
       }
       if (type === "model" && /\.(ifc|obj)$/i.test(chosen!.name)) {
         const { convertModel } = await import("../lib/convert");
-        chosen = await convertModel(chosen!, files, setStatus);
-        uploadFiles = [chosen];
-        uploadEntry = chosen.name;
+        const converted = await convertModel(chosen!, files, setStatus);
+        chosen = converted.file;
+        uploadFiles = [converted.file];
+        uploadEntry = converted.file.name;
+        bimProperties = converted.properties;
       }
       if (uploadFiles.length > 5000)
         throw new Error(
@@ -99,7 +120,24 @@ export default function ImportDialog({ onClose, onImported, position }: Props) {
         );
       if (uploadFiles.some((f) => f.size > 512 * 1024 * 1024))
         throw new Error("单个文件不能超过 512 MB");
+      if (type === "tiles") {
+        const tilesetFile = uploadFiles.find(
+          (f) => (f.webkitRelativePath || f.name) === uploadEntry,
+        );
+        if (!tilesetFile)
+          throw new Error("找不到 tileset.json，请选择完整 3D Tiles 文件夹");
+        try {
+          const tileset = JSON.parse(await tilesetFile.text());
+          if (!tileset.asset || !tileset.root)
+            throw new Error("该 JSON 不是有效的 3D Tiles tileset");
+        } catch (err) {
+          if (err instanceof Error && err.message.includes("3D Tiles"))
+            throw err;
+          throw new Error("tileset.json 无法解析，请检查文件编码与内容");
+        }
+      }
       setStatus("正在保存到本地内容库…");
+      setProgress(0);
       const metadata = {
         name,
         kind: type,
@@ -111,17 +149,33 @@ export default function ImportDialog({ onClose, onImported, position }: Props) {
         entry: uploadEntry,
         assetId: Number(asset),
         sourceFormat,
+        hasProperties: Boolean(bimProperties?.length),
       };
       const form = new FormData();
       form.append("metadata", JSON.stringify(metadata));
       const paths = uploadFiles.map((f) => f.webkitRelativePath || f.name);
+      if (bimProperties?.length) {
+        const propFile = new File(
+          [JSON.stringify(bimProperties)],
+          "bim-properties.json",
+          { type: "application/json" },
+        );
+        uploadFiles = [...uploadFiles, propFile];
+        paths.push("bim-properties.json");
+      }
       form.append("paths", JSON.stringify(paths));
       for (const file of uploadFiles) form.append("files", file, file.name);
-      const layer = await api<Layer>("/layers", { method: "POST", body: form });
+      const layer = await uploadLayer(form, (pct) => {
+        setProgress(pct);
+        setStatus(`正在上传到本地内容库… ${pct}%`);
+      });
       onImported(layer);
       onClose();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "导入失败，请重试");
+      const message = e instanceof Error ? e.message : "导入失败，请重试";
+      setError(message);
+      setStatus("");
+      setProgress(null);
     } finally {
       setBusy(false);
     }
@@ -339,17 +393,45 @@ export default function ImportDialog({ onClose, onImported, position }: Props) {
                   </>
                 )}
               </div>
+              <div className="height-nudge" role="group" aria-label="高程微调">
+                <span>高程微调</span>
+                {[-10, -1, 1, 10].map((delta) => (
+                  <button
+                    key={delta}
+                    type="button"
+                    className="secondary-button"
+                    disabled={busy}
+                    onClick={() =>
+                      setHeight(String(Number(height || 0) + delta))
+                    }
+                  >
+                    {delta > 0 ? `+${delta}m` : `${delta}m`}
+                  </button>
+                ))}
+              </div>
             </>
           )}
           <p className="import-note">
             {type === "model"
-              ? "IFC 在浏览器本地转换（限 100 MB），保留几何与构件编号；RVT 请先导出 IFC。OBJ 请连同材质和贴图一起选择。"
+              ? "IFC 在浏览器本地转换（限 100 MB），保留几何与构件属性到 glTF extras / bim-properties.json；点击模型可查看属性树。RVT 请先导出 IFC，OSGB/RVT 不直接导入。"
               : type === "tiles"
                 ? "请选择包含 tileset.json、瓦片和纹理的完整文件夹，使用模型自带地理定位。OSGB 请先转换为 3D Tiles；单独 B3DM 文件不能直接定位。"
                 : type === "panorama"
                   ? "文件保存在这台电脑，导入后点击地图上的 360 标记即可进入全景。"
                   : "资源必须为已切片的 3D Tiles，且访问令牌具备该资源的读取权限。"}
           </p>
+          {busy && progress != null && (
+            <div
+              className="import-progress"
+              role="progressbar"
+              aria-valuenow={progress}
+              aria-valuemin={0}
+              aria-valuemax={100}
+            >
+              <div style={{ width: `${progress}%` }} />
+              <span>{progress}%</span>
+            </div>
+          )}
           {error && (
             <p className="form-error" role="alert">
               {error}
@@ -361,7 +443,7 @@ export default function ImportDialog({ onClose, onImported, position }: Props) {
             {busy ? (
               <>
                 <LoaderCircle size={15} className="spin" />
-                {status}
+                {status || "处理中…"}
               </>
             ) : (
               "本地内容库 · 不自动上传云端"

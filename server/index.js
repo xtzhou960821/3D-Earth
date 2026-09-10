@@ -73,32 +73,42 @@ app.post("/api/layers", (req, res) => {
       const metadata = validateLayer(input);
       const id = randomUUID();
       let url;
+      let propertiesUrl;
       if (metadata.kind !== "ion") {
         if (!files.length) throw new Error("请选择需要导入的文件");
         const paths = JSON.parse(req.body.paths || "[]");
-        if (paths.length !== files.length) throw new Error("文件清单不完整");
+        if (paths.length !== files.length)
+          throw new Error(
+            `文件清单不完整（收到 ${files.length} 个文件，清单 ${paths.length} 项）`,
+          );
         const cleanPaths = paths.map(safeRelativePath);
         if (new Set(cleanPaths).size !== cleanPaths.length)
           throw new Error("文件路径重复");
         const entry = safeRelativePath(input.entry);
-        if (!cleanPaths.includes(entry)) throw new Error("找不到入口文件");
+        if (!cleanPaths.includes(entry))
+          throw new Error(`找不到入口文件：${entry}`);
         const ext = path.extname(entry).toLowerCase();
         if (metadata.kind === "tiles") {
           if (ext !== ".json")
             throw new Error("3D Tiles 需要选择 tileset.json 入口");
-          const tileset = JSON.parse(
-            await fs.readFile(files[cleanPaths.indexOf(entry)].path, "utf8"),
-          );
+          let tileset;
+          try {
+            tileset = JSON.parse(
+              await fs.readFile(files[cleanPaths.indexOf(entry)].path, "utf8"),
+            );
+          } catch {
+            throw new Error("tileset.json 无法解析，请检查文件编码与内容");
+          }
           if (!tileset.asset || !tileset.root)
-            throw new Error("该 JSON 不是有效的 3D Tiles tileset");
+            throw new Error("该 JSON 不是有效的 3D Tiles tileset（缺少 asset/root）");
         }
         if (metadata.kind === "model" && ![".glb", ".gltf"].includes(ext))
-          throw new Error("模型需要转换为 GLB 或 glTF 后导入");
+          throw new Error("模型需要转换为 GLB 或 glTF 后导入（IFC/OBJ 请在浏览器端先转换）");
         if (
           metadata.kind === "panorama" &&
           ![".jpg", ".jpeg", ".png", ".webp"].includes(ext)
         )
-          throw new Error("请选择全景图片");
+          throw new Error("请选择全景图片（JPG / PNG / WebP）");
         directory = path.join(uploadRoot, id);
         await fs.mkdir(directory, { recursive: true });
         for (let i = 0; i < files.length; i++) {
@@ -107,11 +117,18 @@ app.post("/api/layers", (req, res) => {
           await fs.rename(files[i].path, target);
         }
         url = `/uploads/${id}/${entry.split("/").map(encodeURIComponent).join("/")}`;
+        if (
+          metadata.kind === "model" &&
+          cleanPaths.includes("bim-properties.json")
+        ) {
+          propertiesUrl = `/uploads/${id}/bim-properties.json`;
+        }
       }
       const layer = {
         id,
         ...metadata,
         url,
+        ...(propertiesUrl ? { propertiesUrl } : {}),
         visible: true,
         createdAt: new Date().toISOString(),
         bytes: files.reduce((n, f) => n + f.size, 0),
