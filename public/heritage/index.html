@@ -1,301 +1,178 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>仙通的旅途 - 大西北 · 西藏阿里 · 成都 · 徽州皖南</title>
-  <meta name="description" content="仙通的旅途：2026大西北之旅、2024西藏阿里大环线、成都与徽州皖南之行，用镜头记录大西北的苍茫壮阔与徽州的婉约清新">
-  <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-  <!-- 导航栏 -->
-  <nav class="navbar">
-    <div class="nav-container">
-      <a href="index.html" class="nav-logo">仙通的旅途</a>
-      <ul class="nav-links">
-        <li><a href="index.html" class="active">首页</a></li>
-        <li><a href="helan-mountain.html">贺兰山</a></li>
-        <li><a href="xixia-tomb.html">西夏陵</a></li>
-        <li><a href="baota-mountain.html">宝塔山</a></li>
-        <li><a href="hukou-waterfall.html">壶口瀑布</a></li>
-        <li><a href="tibet-ali.html">西藏阿里</a></li>
-        <li><a href="chengdu.html">成都</a></li>
-        <li><a href="huangshan.html">黄山</a></li>
-        <li><a href="wuyuan.html">婺源</a></li>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>旅行相册入口 · 山海 Earth</title>
+    <meta
+      name="description"
+      content="轻量入口页：相册托管在公开站 xixia-heritage，本页仅提供深链，不镜像图片。"
+    />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0c171c;
+        --panel: #142428;
+        --text: #e7f0f2;
+        --muted: #8ea9ad;
+        --accent: #c9a46a;
+        --line: #2a4146;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Noto Serif SC", "Songti SC", Georgia, serif;
+        background:
+          radial-gradient(ellipse at top, #1a3036 0%, transparent 55%),
+          linear-gradient(160deg, #0c171c, #132226 60%, #0a1215);
+        color: var(--text);
+      }
+      main {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 48px 20px 64px;
+      }
+      h1 {
+        font-size: clamp(1.6rem, 4vw, 2.2rem);
+        font-weight: 600;
+        margin: 0 0 12px;
+      }
+      .lead {
+        color: var(--muted);
+        line-height: 1.7;
+        margin: 0 0 28px;
+        font-family: "Noto Sans SC", system-ui, sans-serif;
+        font-size: 0.95rem;
+      }
+      .note {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        padding: 14px 16px;
+        border-radius: 10px;
+        color: var(--muted);
+        font-family: "Noto Sans SC", system-ui, sans-serif;
+        font-size: 0.85rem;
+        line-height: 1.6;
+        margin-bottom: 28px;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 10px;
+      }
+      a {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: baseline;
+        text-decoration: none;
+        color: var(--text);
+        border: 1px solid var(--line);
+        background: rgba(20, 36, 40, 0.85);
+        border-radius: 10px;
+        padding: 14px 16px;
+      }
+      a:hover {
+        border-color: var(--accent);
+      }
+      a strong {
+        font-weight: 600;
+      }
+      a span {
+        color: var(--muted);
+        font-family: "Noto Sans SC", system-ui, sans-serif;
+        font-size: 0.8rem;
+      }
+      .back {
+        display: inline-block;
+        margin-bottom: 28px;
+        color: var(--accent);
+        font-family: "Noto Sans SC", system-ui, sans-serif;
+        font-size: 0.9rem;
+        border: none;
+        background: none;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <a class="back" href="../">← 返回山海 Earth</a>
+      <h1>旅行相册入口</h1>
+      <p class="lead">
+        相册托管在公开站
+        <a
+          href="https://xtzhou960821.github.io/xixia-heritage/"
+          style="display: inline; border: none; background: none; padding: 0; color: var(--accent)"
+          >xtzhou960821.github.io/xixia-heritage</a
+        >。本页只做深链索引，不复制图片或完整相册 HTML。
+      </p>
+      <p class="note">
+        体积说明：完整 images/ 约 860MB，不会并入 3D-Earth。若私有仓库无法启用
+        GitHub Pages，仍可继续使用上述公开相册 URL；本仓库本地
+        Express/Cesium 工作站路径不受影响。
+      </p>
+      <ul>
+        <li>
+          <a href="https://xtzhou960821.github.io/xixia-heritage/"
+            ><strong>相册首页</strong><span>全部旅程</span></a
+          >
+        </li>
+        <li>
+          <a href="https://xtzhou960821.github.io/xixia-heritage/huangshan.html"
+            ><strong>黄山</strong><span>地球目的地互链</span></a
+          >
+        </li>
+        <li>
+          <a
+            href="https://xtzhou960821.github.io/xixia-heritage/tibet-lhasa.html"
+            ><strong>拉萨 · 布达拉宫</strong><span>地球目的地互链</span></a
+          >
+        </li>
+        <li>
+          <a
+            href="https://xtzhou960821.github.io/xixia-heritage/helan-mountain.html"
+            ><strong>贺兰山</strong><span>公开相册</span></a
+          >
+        </li>
+        <li>
+          <a href="https://xtzhou960821.github.io/xixia-heritage/xixia-tomb.html"
+            ><strong>西夏陵</strong><span>公开相册</span></a
+          >
+        </li>
+        <li>
+          <a
+            href="https://xtzhou960821.github.io/xixia-heritage/baota-mountain.html"
+            ><strong>宝塔山</strong><span>公开相册</span></a
+          >
+        </li>
+        <li>
+          <a
+            href="https://xtzhou960821.github.io/xixia-heritage/hukou-waterfall.html"
+            ><strong>壶口瀑布</strong><span>公开相册</span></a
+          >
+        </li>
+        <li>
+          <a href="https://xtzhou960821.github.io/xixia-heritage/tibet-ali.html"
+            ><strong>西藏阿里</strong><span>公开相册</span></a
+          >
+        </li>
+        <li>
+          <a href="https://xtzhou960821.github.io/xixia-heritage/chengdu.html"
+            ><strong>成都</strong><span>公开相册</span></a
+          >
+        </li>
+        <li>
+          <a href="https://xtzhou960821.github.io/xixia-heritage/wuyuan.html"
+            ><strong>婺源</strong><span>公开相册</span></a
+          >
+        </li>
       </ul>
-    </div>
-  </nav>
-
-  <!-- Hero 区域 -->
-  <section class="hero">
-    <img src="https://xtzhou960821.github.io/xixia-heritage/images/tibet-ali/lake_052.jpg" alt="西藏圣湖雪山" class="hero-bg">
-    <div class="hero-overlay"></div>
-    <div class="hero-content">
-      <p class="hero-subtitle">大西北之旅 · 西藏阿里 · 天府成都 · 徽州皖南</p>
-      <h1 class="hero-title">戈壁苍茫<br>烟雨徽州</h1>
-      <p class="hero-desc">从贺兰山戈壁、壶口惊雷、阿里圣湖，到黄山云海、婺源梯田<br>大西北苍茫辽阔，徽州婉约清新，用镜头收藏山河与人文的极致之美</p>
-      <a href="tibet-ali.html" class="hero-btn">开启西藏阿里之旅</a>
-    </div>
-  </section>
-
-  <!-- 旅程概览 -->
-  <section class="container">
-    <div class="section-header fade-in">
-      <span class="section-tag">旅程概览</span>
-      <h2 class="section-title">大西北 · 四大目的地</h2>
-      <div class="section-line"></div>
-    </div>
-
-    <div class="feature-row fade-in">
-      <div class="feature-image">
-        <img src="https://xtzhou960821.github.io/xixia-heritage/images/helan/helan_01.jpg" alt="贺兰山">
-      </div>
-      <div class="feature-content">
-        <h3>内蒙古 · 贺兰山</h3>
-        <p>贺兰山，蒙古语意为"骏马"，是中国西北地区的重要山脉，也是内蒙古与宁夏的天然分界。这里不仅有壮丽的戈壁风光，还有珍贵的岩画遗迹，记录着远古人类的生活印记。</p>
-        <p>海拔2513米的主峰下，牛群在碎石路上悠闲漫步，双峰骆驼穿越公路，展现出一幅原始而苍凉的西北画卷。</p>
-        <a href="helan-mountain.html" style="color: var(--accent-gold); text-decoration: none; font-weight: 500;">了解更多 →</a>
-      </div>
-    </div>
-
-    <div class="feature-row reverse fade-in">
-      <div class="feature-image">
-        <img src="https://xtzhou960821.github.io/xixia-heritage/images/hukou/IMG_5294.JPG" alt="壶口瀑布">
-      </div>
-      <div class="feature-content">
-        <h3>陕西 · 壶口瀑布</h3>
-        <p>壶口瀑布，位于黄河中游秦晋大峡谷，是世界最大的黄色瀑布。黄河奔流至此，从300余米宽的河面骤然压缩至50余米，从20多米高的陡崖上倾泻而下——"千里黄河一壶收"。</p>
-        <p>瀑布激起的水雾腾空而起，涛声如万鼓齐鸣、千军万马，站在岸边感受黄河母亲河最深沉的脉动，震撼心灵。陕西宜川侧正面观赏，盛夏汛期尤显磅礴。</p>
-        <a href="hukou-waterfall.html" style="color: var(--accent-gold); text-decoration: none; font-weight: 500;">了解更多 →</a>
-      </div>
-    </div>
-
-    <div class="feature-row fade-in">
-      <div class="feature-image">
-        <img src="https://xtzhou960821.github.io/xixia-heritage/images/baota/IMG_5263.JPG" alt="延安宝塔山">
-      </div>
-      <div class="feature-content">
-        <h3>陕西 · 宝塔山</h3>
-        <p>宝塔山，延安的标志性建筑，中国革命的精神象征。始建于唐代的宝塔，见证了抗日战争和解放战争的峥嵘岁月，"几回回梦里回延安，双手搂定宝塔山"。</p>
-        <p>山上还有陕北窑洞展览、毛主席复电石碑等，展现了延安深厚的红色文化和黄土高原的民居智慧。</p>
-        <a href="baota-mountain.html" style="color: var(--accent-gold); text-decoration: none; font-weight: 500;">了解更多 →</a>
-      </div>
-    </div>
-
-    <div class="feature-row reverse fade-in">
-      <div class="feature-image">
-        <img src="https://xtzhou960821.github.io/xixia-heritage/images/xixia/IMG_5217.JPG" alt="西夏陵遗址">
-      </div>
-      <div class="feature-content">
-        <h3>宁夏 · 西夏陵</h3>
-        <p>西夏陵，位于宁夏银川市西郊贺兰山东麓，是西夏王朝（1038-1227）的皇家陵园，被誉为"东方金字塔"。这里埋葬着西夏九位帝王，是中国现存规模最大、地面遗址最完整的帝王陵园之一。</p>
-        <p>西夏，一个由党项族建立的神秘王朝，创制了自己的文字，融合了汉、藏、回鹘等多元文化，在丝绸之路上绽放出独特的文明之光。</p>
-        <a href="xixia-tomb.html" style="color: var(--accent-gold); text-decoration: none; font-weight: 500;">深入了解 →</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- 西藏阿里专区 -->
-  <section class="container">
-    <div class="section-header fade-in">
-      <span class="section-tag">世界屋脊 · 天上阿里</span>
-      <h2 class="section-title">西藏阿里大环线</h2>
-      <div class="section-line"></div>
-    </div>
-
-    <div class="feature-row fade-in">
-      <div class="feature-image">
-        <img src="https://xtzhou960821.github.io/xixia-heritage/images/tibet-ali/lake_hero.jpg" alt="西藏圣湖雪山">
-      </div>
-      <div class="feature-content">
-        <h3>2024 · 西藏阿里</h3>
-        <p>2024年5-6月，从拉萨布达拉宫出发，环行世界屋脊的屋脊。圣湖雪山、扎达土林、神秘古格王朝、班公湖与羌塘野生动物，一措再措，一山再山。</p>
-        <p>这是雪域高原最极致、最纯粹的一场旅行，用镜头记录天上阿里的极致之美。</p>
-        <a href="tibet-ali.html" style="color: var(--accent-gold); text-decoration: none; font-weight: 500;">进入西藏阿里之旅 →</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- 成都专区 -->
-  <section class="container">
-    <div class="section-header fade-in">
-      <span class="section-tag">天府之国 · 古蜀与人文</span>
-      <h2 class="section-title">成都 · 九天之旅</h2>
-      <div class="section-line"></div>
-    </div>
-
-    <div class="feature-row fade-in">
-      <div class="feature-image">
-        <img src="https://xtzhou960821.github.io/xixia-heritage/images/chengdu/wuhou_02.jpg" alt="成都武侯祠红墙竹影">
-      </div>
-      <div class="feature-content">
-        <h3>2024 · 成都</h3>
-        <p>2024年春节，以成都为圆心，展开一场横跨古蜀、三国、唐宋文脉与自然生灵的深度之旅：春熙路太古里、武侯祠锦里、宽窄巷子、金沙遗址、杜甫草堂、眉山三苏祠、三星堆、大熊猫基地，直至乐山大佛。</p>
-        <p>九天行程，一城一世界，用镜头记录天府之国的从容与辽阔。</p>
-        <a href="chengdu.html" style="color: var(--accent-gold); text-decoration: none; font-weight: 500;">进入成都之旅 →</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- 皖南徽州专区 -->
-  <section class="container">
-    <div class="section-header fade-in">
-      <span class="section-tag">徽州皖南 · 山水与田园</span>
-      <h2 class="section-title">黄山 · 婺源</h2>
-      <div class="section-line"></div>
-    </div>
-
-    <div class="feature-row fade-in">
-      <div class="feature-image">
-        <img src="https://xtzhou960821.github.io/xixia-heritage/images/huangshan/sunrise_01.jpg" alt="黄山晨光">
-      </div>
-      <div class="feature-content">
-        <h3>安徽 · 黄山</h3>
-        <p>2026年3月29日，一日黄山。从清晨前山的晨光出发，经天海、光明顶到西海排云亭，奇松怪石、峰峦叠嶂，领略"五岳归来不看山，黄山归来不看岳"的极致山水。</p>
-        <p>日落后走进屯溪老街，华灯初上的石板路上，黄山烧饼、葛根酥与一顿地道的徽州臭鳜鱼，为壮丽山河添上人间烟火。</p>
-        <a href="huangshan.html" style="color: var(--accent-gold); text-decoration: none; font-weight: 500;">进入黄山之旅 →</a>
-      </div>
-    </div>
-
-    <div class="feature-row reverse fade-in">
-      <div class="feature-image">
-        <img src="https://xtzhou960821.github.io/xixia-heritage/images/wuyuan/cover.png" alt="婺源山水">
-      </div>
-      <div class="feature-content">
-        <h3>江西 · 婺源</h3>
-        <p>2026年3月30日，从挂在山崖上的篁岭古村出发，天街古巷、晒秋人家，徽派民居层层叠叠；午后抵达江岭，梯田顺山势铺向山谷，油菜花季的尾声依旧壮阔。</p>
-        <p>无人机升空俯瞰，梯田化作流畅的曲线；傍晚沿北线山谷返程，青山环抱、暮色温柔——一天两村，梦回徽州。</p>
-        <a href="wuyuan.html" style="color: var(--accent-gold); text-decoration: none; font-weight: 500;">进入婺源之旅 →</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- 精彩瞬间 -->
-  <section class="container">
-    <div class="section-header fade-in">
-      <span class="section-tag">影像记忆</span>
-      <h2 class="section-title">旅途掠影</h2>
-      <div class="section-line"></div>
-    </div>
-
-    <div class="gallery-grid fade-in">
-      <div class="gallery-item">
-        <img src="https://xtzhou960821.github.io/xixia-heritage/images/tibet-ali/brak_hero.jpg" alt="布达拉宫">
-        <div class="gallery-overlay">
-          <h4>布达拉宫</h4>
-          <p>世界屋脊的信仰中心</p>
-        </div>
-      </div>
-      <div class="gallery-item">
-        <img src="https://xtzhou960821.github.io/xixia-heritage/images/tibet-ali/lake_075.jpg" alt="圣湖飞鸟">
-        <div class="gallery-overlay">
-          <h4>圣湖飞鸟</h4>
-          <p>高原明珠上的生命</p>
-        </div>
-      </div>
-      <div class="gallery-item">
-        <img src="https://xtzhou960821.github.io/xixia-heritage/images/hukou/IMG_5280.JPG" alt="壶口瀑布">
-        <div class="gallery-overlay">
-          <h4>壶口瀑布</h4>
-          <p>千里黄河一壶收</p>
-        </div>
-      </div>
-      <div class="gallery-item">
-        <img src="https://xtzhou960821.github.io/xixia-heritage/images/tibet-ali/zhada_173.jpg" alt="古格王朝">
-        <div class="gallery-overlay">
-          <h4>古格王朝</h4>
-          <p>神秘消失的王国</p>
-        </div>
-      </div>
-      <div class="gallery-item">
-        <img src="https://xtzhou960821.github.io/xixia-heritage/images/baota/IMG_5263.JPG" alt="延安宝塔山">
-        <div class="gallery-overlay">
-          <h4>延安宝塔山</h4>
-          <p>革命圣地的象征</p>
-        </div>
-      </div>
-      <div class="gallery-item">
-        <img src="https://xtzhou960821.github.io/xixia-heritage/images/tibet-ali/wild_209.jpg" alt="野生动物">
-        <div class="gallery-overlay">
-          <h4>高原生灵</h4>
-          <p>羌塘草原的野性</p>
-        </div>
-      </div>
-      <div class="gallery-item">
-        <img src="https://xtzhou960821.github.io/xixia-heritage/images/chengdu/leshan_01.jpg" alt="乐山大佛">
-        <div class="gallery-overlay">
-          <h4>乐山大佛</h4>
-          <p>山是一尊佛，佛是一座山</p>
-        </div>
-      </div>
-      <div class="gallery-item">
-        <img src="https://xtzhou960821.github.io/xixia-heritage/images/huangshan/sunrise_04.jpg" alt="黄山晨光">
-        <div class="gallery-overlay">
-          <h4>黄山晨光</h4>
-          <p>五岳归来不看山</p>
-        </div>
-      </div>
-      <div class="gallery-item">
-        <img src="https://xtzhou960821.github.io/xixia-heritage/images/wuyuan/drone_01.jpg" alt="江岭航拍">
-        <div class="gallery-overlay">
-          <h4>江岭航拍</h4>
-          <p>中国最美乡村</p>
-        </div>
-      </div>
-      <div class="gallery-item">
-        <img src="https://xtzhou960821.github.io/xixia-heritage/images/huangshan/tunxi_01.jpg" alt="屯溪老街夜色">
-        <div class="gallery-overlay">
-          <h4>屯溪老街</h4>
-          <p>活动着的清明上河图</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 装饰分隔 -->
-  <div class="ornament">❖ ❖ ❖</div>
-
-  <!-- 关于旅程 -->
-  <section class="container">
-    <div class="section-header fade-in">
-      <span class="section-tag">关于此行</span>
-      <h2 class="section-title">从苍茫到婉约</h2>
-      <div class="section-line"></div>
-    </div>
-
-    <div class="quote-block fade-in">
-      大西北的苍茫辽阔，是贺兰山的戈壁、壶口的惊雷、阿里圣湖的镜面天光；徽州的婉约清新，是黄山的云海、婺源的梯田、屯溪老街的灯火。同一副山河，两种性情——用镜头记录这场从苍茫到婉约的旅程。
-    </div>
-
-    <div class="card-grid fade-in">
-      <div class="card">
-        <div class="card-icon">🏔️</div>
-        <h4>自然奇观</h4>
-        <p>贺兰山的苍茫戈壁、壶口的黄河咆哮、阿里的圣湖雪山，与黄山的云海奇峰、婺源的万亩梯田，构成一幅从壮阔到清新的自然长卷。</p>
-      </div>
-      <div class="card">
-        <div class="card-icon">🏛️</div>
-        <h4>历史遗迹</h4>
-        <p>西夏陵保存着9座帝陵；古格王朝遗址诉说着神秘消失的王朝历史；屯溪老街则是活着的徽州人文。</p>
-      </div>
-      <div class="card">
-        <div class="card-icon">📜</div>
-        <h4>文明溯源</h4>
-        <p>从西夏文字、雪域信仰，到黄河文明、徽州文脉与田园智慧，这一路是中华文明多元一体的活态见证。</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- 页脚 -->
-  <footer class="footer">
-    <div class="footer-content">
-      <h3 class="footer-title">仙通的旅途</h3>
-      <p class="footer-text">2024西藏阿里大环线、2026大西北之旅与徽州皖南之行。从临海出发，从苍茫到婉约，用镜头记录千年历史、壮丽山河与田园人文，这是一场与大地和时光的对话。</p>
-      <div class="footer-divider"></div>
-      <p class="footer-copyright">© 2026 仙通 · 仙通的旅途 | 用镜头记录世界，用脚步丈量天地</p>
-    </div>
-  </footer>
-
-  <script src="js/main.js"></script>
-</body>
+    </main>
+  </body>
 </html>

@@ -103,7 +103,6 @@ export const places: Place[] = [
     highlights: ["迎客松", "光明顶", "西海大峡谷"],
     stay: ["汤口镇酒店", "黄山山顶酒店"],
     food: ["徽州臭鳜鱼", "毛豆腐", "黄山烧饼"],
-    heritageAlbum: "heritage/huangshan.html",
   },
   {
     id: "greatwall",
@@ -186,7 +185,6 @@ export const places: Place[] = [
     highlights: ["红宫", "白宫", "宗角禄康"],
     stay: ["布达拉宫广场酒店", "八廓街酒店"],
     food: ["藏面", "酥油茶", "牦牛酸奶"],
-    heritageAlbum: "heritage/tibet-lhasa.html",
   },
   {
     id: "bund",
