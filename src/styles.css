@@ -488,6 +488,9 @@ small {
 .settings-button {
   margin-left: auto;
 }
+.map-top .settings-button + .settings-button {
+  margin-left: 0;
+}
 .icon-button {
   width: 44px;
   height: 44px;
@@ -1412,6 +1415,150 @@ small {
 .layer-edit > .primary-button {
   margin-top: 15px;
   width: 100%;
+}
+.layer-coords {
+  font-variant-numeric: tabular-nums;
+  color: #a8c4c0 !important;
+}
+.demo-badge {
+  display: inline-block;
+  margin-left: 8px;
+  font-style: normal;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: #d7c39a;
+  background: #3a3424;
+  border: 1px solid #5a4f35;
+  vertical-align: middle;
+}
+.layer-status.loading {
+  color: #c4b07a;
+}
+.layer-edit-summary {
+  font-size: 10px;
+  color: #a8c4c0;
+  margin-bottom: 10px;
+  font-variant-numeric: tabular-nums;
+}
+.height-nudge {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+.height-nudge > span {
+  font-size: 10px;
+  color: var(--muted);
+  margin-right: 4px;
+}
+.height-nudge .secondary-button {
+  padding: 5px 9px;
+  font-size: 11px;
+  min-width: 0;
+}
+.import-progress {
+  position: relative;
+  height: 22px;
+  border-radius: 6px;
+  background: #0d1b22;
+  border: 1px solid #355057;
+  overflow: hidden;
+}
+.import-progress > div {
+  height: 100%;
+  background: linear-gradient(90deg, #2f6b5c, #9bdcc4);
+  transition: width 0.2s ease;
+}
+.import-progress > span {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: #edf2f3;
+  text-shadow: 0 1px 2px #0008;
+}
+.bim-panel {
+  position: absolute;
+  top: 72px;
+  right: 18px;
+  z-index: 25;
+  width: min(320px, calc(100% - 36px));
+  max-height: min(52vh, 420px);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #355057;
+  border-radius: 12px;
+  background: #111c20f2;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 12px 40px #0006;
+  overflow: hidden;
+}
+.bim-panel > header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 14px 10px;
+  border-bottom: 1px solid #2c3e46;
+}
+.bim-panel > header small {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.bim-panel > header strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.bim-empty {
+  padding: 22px 18px 24px;
+  text-align: center;
+  color: #9bb0b6;
+}
+.bim-empty > svg {
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+.bim-empty p {
+  font-size: 13px;
+  margin-bottom: 8px;
+  color: #d5e2e4;
+}
+.bim-empty small {
+  font-size: 10px;
+  line-height: 1.7;
+  display: block;
+}
+.bim-props {
+  list-style: none;
+  margin: 0;
+  padding: 8px 0 12px;
+  overflow: auto;
+}
+.bim-props li {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 10px;
+  padding: 8px 14px;
+  font-size: 11px;
+  border-bottom: 1px solid #1c2b31;
+}
+.bim-props li span {
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.bim-props li strong {
+  font-weight: 500;
+  color: #e4efef;
+  overflow-wrap: anywhere;
+  text-align: right;
 }
 .delete-confirm {
   padding: 12px;

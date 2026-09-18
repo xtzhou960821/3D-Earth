@@ -1,13 +1,32 @@
+/**
+ * Convert IFC / OBJ into a browser-viewable GLB, optionally with BIM sidecar metadata.
+ */
 import * as THREE from "three";
 import { GLTFExporter } from "three/addons/exporters/GLTFExporter.js";
+import type { BimFeatureRecord } from "./bimPick";
+
+/** Result of local model conversion before upload. */
+export interface ConvertResult {
+  file: File;
+  /** IFC feature index written as bim-properties.json when present. */
+  properties?: BimFeatureRecord[];
+}
+
+/**
+ * Convert an IFC or OBJ selection into GLB (+ optional BIM property index).
+ * @param file Entry model file
+ * @param files Full file list (OBJ materials / textures)
+ * @param progress Status callback for the import dialog
+ */
 export async function convertModel(
   file: File,
   files: File[],
   progress: (message: string) => void,
-): Promise<File> {
+): Promise<ConvertResult> {
   const ext = file.name.split(".").pop()?.toLowerCase();
   const group = new THREE.Group();
   const urls: string[] = [];
+  const properties: BimFeatureRecord[] = [];
   let release = () => {};
   try {
     if (ext === "ifc") {
@@ -68,12 +87,23 @@ export async function convertModel(
             new THREE.Matrix4().fromArray(part.flatTransformation),
           );
           mesh.name = `IFC-${flat.expressID}`;
-          const props = ifc.GetLine(id, flat.expressID);
-          mesh.userData = {
+          const props = ifc.GetLine(id, flat.expressID) as {
+            type?: string | number;
+            Name?: { value?: string };
+            GlobalId?: { value?: string };
+            ObjectType?: { value?: string };
+            Tag?: { value?: string };
+          } | null;
+          const record: BimFeatureRecord = {
             expressID: flat.expressID,
             ifcType: props?.type,
-            ifcName: props?.Name?.value || "",
+            Name: props?.Name?.value || "",
+            GlobalId: props?.GlobalId?.value || "",
+            ObjectType: props?.ObjectType?.value || "",
+            Tag: props?.Tag?.value || "",
           };
+          properties.push(record);
+          mesh.userData = { ...record };
           group.add(mesh);
           geom.delete();
         }
@@ -171,11 +201,14 @@ export async function convertModel(
       binary: true,
       onlyVisible: false,
     });
-    return new File(
-      [data as ArrayBuffer],
-      file.name.replace(/\.[^.]+$/, ".glb"),
-      { type: "model/gltf-binary" },
-    );
+    return {
+      file: new File(
+        [data as ArrayBuffer],
+        file.name.replace(/\.[^.]+$/, ".glb"),
+        { type: "model/gltf-binary" },
+      ),
+      properties: properties.length ? properties : undefined,
+    };
   } finally {
     release();
     urls.forEach(URL.revokeObjectURL);
@@ -189,6 +222,11 @@ export async function convertModel(
     });
   }
 }
+
+/**
+ * Validate equirectangular panorama aspect and size before upload.
+ * @param file Image file
+ */
 export async function validatePanorama(file: File) {
   const url = URL.createObjectURL(file);
   try {

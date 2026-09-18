@@ -15,6 +15,10 @@ import {
 } from "lucide-react";
 import type { Layer } from "../types";
 import { api, updateLayer } from "../lib/api";
+
+/**
+ * Sidebar list of user/demo layers with adjust / focus / delete actions.
+ */
 export default function LayersPanel({
   layers,
   statuses,
@@ -40,9 +44,21 @@ export default function LayersPanel({
   const [edit, setEdit] = useState<Layer | null>(null),
     [busy, setBusy] = useState<string | null>(null),
     [deleting, setDeleting] = useState<string | null>(null);
+
+  /**
+   * Patch a layer via API, or locally for read-only demo layers.
+   * @param l Target layer
+   * @param values Partial fields to merge
+   */
   async function patch(l: Layer, values: Partial<Layer>) {
     setBusy(l.id);
     try {
+      if (l.readOnly || !importEnabled) {
+        const changed = { ...l, ...values };
+        onChange(layers.map((x) => (x.id === l.id ? changed : x)));
+        setEdit(null);
+        return;
+      }
       const changed = await updateLayer(l.id, values);
       onChange(layers.map((x) => (x.id === l.id ? changed : x)));
       setEdit(null);
@@ -52,7 +68,18 @@ export default function LayersPanel({
       setBusy(null);
     }
   }
+
+  /**
+   * Delete a layer and its uploaded files (skipped for read-only demos).
+   * @param id Layer id
+   */
   async function remove(id: string) {
+    const target = layers.find((l) => l.id === id);
+    if (target?.readOnly) {
+      notify("演示图层不可删除");
+      setDeleting(null);
+      return;
+    }
     setBusy(id);
     try {
       await api(`/layers/${id}`, { method: "DELETE" });
@@ -65,6 +92,29 @@ export default function LayersPanel({
       setBusy(null);
     }
   }
+
+  /**
+   * Format lon/lat/height for the layer summary line.
+   * @param l Layer
+   */
+  function positionLabel(l: Layer) {
+    return `${l.longitude.toFixed(5)}, ${l.latitude.toFixed(5)} · h ${Math.round(l.height)} m`;
+  }
+
+  /**
+   * Whether a status string means the layer is ready to focus.
+   * @param status Layer status text
+   */
+  function canFocus(status: string | undefined) {
+    if (!status) return false;
+    return (
+      status === "已加载" ||
+      status === "正在准备模型" ||
+      status.startsWith("加载瓦片") ||
+      status.includes("部分瓦片")
+    );
+  }
+
   return (
     <div className="layers-panel">
       <div className="panel-heading">
@@ -85,7 +135,12 @@ export default function LayersPanel({
         导入内容
       </button>
       {!importEnabled && (
-        <p className="import-disabled-tip">完整导入能力请本机 npm start</p>
+        <p className="import-disabled-tip">
+          完整导入能力请本机 npm start
+          {layers.some((l) => l.readOnly)
+            ? " · 下方为 Pages 只读示例图层"
+            : ""}
+        </p>
       )}
       {!layers.length ? (
         <div className="empty-state">
@@ -108,13 +163,26 @@ export default function LayersPanel({
                   )}
                 </span>
                 <div>
-                  <strong>{l.name}</strong>
+                  <strong>
+                    {l.name}
+                    {l.readOnly ? <em className="demo-badge">演示</em> : null}
+                  </strong>
                   <small>
                     {l.sourceFormat || l.kind.toUpperCase()} ·{" "}
                     {l.bytes
                       ? (l.bytes / 1024 / 1024).toFixed(1) + " MB"
                       : "云端资源"}
                   </small>
+                  {(l.kind === "model" || l.kind === "panorama") && (
+                    <small className="layer-coords" title="WGS84 · 椭球高">
+                      {positionLabel(l)}
+                    </small>
+                  )}
+                  {l.kind === "tiles" && l.readOnly && (
+                    <small className="layer-coords" title="示例大致位置">
+                      成都附近 · tileset 自带变换
+                    </small>
+                  )}
                 </div>
                 <button
                   className="icon-button"
@@ -126,7 +194,9 @@ export default function LayersPanel({
                 </button>
               </div>
               <p
-                className={`layer-status ${statuses[l.id]?.includes("失败") ? "error" : ""}`}
+                className={`layer-status ${
+                  statuses[l.id]?.includes("失败") ? "error" : ""
+                } ${statuses[l.id]?.includes("加载") && !statuses[l.id]?.includes("失败") && statuses[l.id] !== "已加载" ? "loading" : ""}`}
               >
                 <i />
                 {statuses[l.id] || "等待加载"}
@@ -134,9 +204,7 @@ export default function LayersPanel({
               </p>
               <div className="layer-actions">
                 <button
-                  disabled={
-                    !["已加载", "正在准备模型"].includes(statuses[l.id])
-                  }
+                  disabled={!canFocus(statuses[l.id])}
                   onClick={() =>
                     l.kind === "panorama" ? onPanorama(l) : onFocus(l)
                   }
@@ -144,7 +212,7 @@ export default function LayersPanel({
                   <Focus size={14} />
                   {l.kind === "panorama" ? "打开全景" : "定位"}
                 </button>
-                {l.kind === "model" && (
+                {l.kind === "model" && !l.readOnly && importEnabled && (
                   <button
                     onClick={() => setEdit(edit?.id === l.id ? null : { ...l })}
                   >
@@ -152,13 +220,15 @@ export default function LayersPanel({
                     调整
                   </button>
                 )}
-                <button
-                  className="delete-button"
-                  aria-label={"删除 " + l.name}
-                  onClick={() => setDeleting(deleting === l.id ? null : l.id)}
-                >
-                  <Trash2 size={14} />
-                </button>
+                {!l.readOnly && importEnabled && (
+                  <button
+                    className="delete-button"
+                    aria-label={"删除 " + l.name}
+                    onClick={() => setDeleting(deleting === l.id ? null : l.id)}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                )}
               </div>
               {deleting === l.id && (
                 <div className="delete-confirm">
@@ -180,6 +250,9 @@ export default function LayersPanel({
                     void patch(l, edit);
                   }}
                 >
+                  <p className="layer-edit-summary">
+                    当前：{positionLabel(edit)}
+                  </p>
                   <div className="form-grid">
                     {(
                       [
@@ -227,6 +300,21 @@ export default function LayersPanel({
                           }
                         />
                       </label>
+                    ))}
+                  </div>
+                  <div className="height-nudge" role="group" aria-label="高程微调">
+                    <span>高程微调</span>
+                    {[-10, -1, 1, 10].map((delta) => (
+                      <button
+                        key={delta}
+                        type="button"
+                        className="secondary-button"
+                        onClick={() =>
+                          setEdit({ ...edit, height: edit.height + delta })
+                        }
+                      >
+                        {delta > 0 ? `+${delta}m` : `${delta}m`}
+                      </button>
                     ))}
                   </div>
                   <button className="primary-button" disabled={busy === l.id}>

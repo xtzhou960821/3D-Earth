@@ -31,10 +31,12 @@ import {
   Menu,
   Download,
   FileUp,
+  Link2,
 } from "lucide-react";
 import { Globe } from "./components/Globe";
 import PlaceDetail from "./components/PlaceDetail";
 import LayersPanel from "./components/LayersPanel";
+import PropertiesPanel from "./components/PropertiesPanel";
 import Modal from "./components/Modal";
 import { places } from "./data/places";
 import type { Category, CheckIn, Layer, MapHandle, Place } from "./types";
@@ -45,6 +47,12 @@ import {
   parseTravelRecords,
   type TravelRecordsDoc,
 } from "./lib/travelRecords";
+import { getDemoLayers } from "./lib/demoLayers";
+import {
+  buildShareUrl,
+  readShareViewFromLocation,
+} from "./lib/shareView";
+import type { BimPickInfo } from "./lib/bimPick";
 const ImportDialog = lazy(() => import("./components/ImportDialog"));
 const Panorama = lazy(() => import("./components/Panorama"));
 const categories = ["全部", "自然风光", "人文古迹", "城市漫游"] as const;
@@ -91,7 +99,9 @@ export default function App() {
     [mobileOpen, setMobileOpen] = useState(false),
     [pendingRecords, setPendingRecords] = useState<TravelRecordsDoc | null>(
       null,
-    );
+    ),
+    [bimPick, setBimPick] = useState<BimPickInfo | null>(null),
+    [shareReady, setShareReady] = useState(false);
   const notify = useCallback((text: string) => setToast(text), []);
   const closeImport = useCallback(() => setImporting(false), []),
     closePanorama = useCallback(() => setPanorama(null), []),
@@ -101,6 +111,9 @@ export default function App() {
     setBuildings(false);
     setBuildingsHint(message);
     setStatus(message);
+  }, []);
+  const onBimPick = useCallback((info: BimPickInfo | null) => {
+    setBimPick(info);
   }, []);
   const openImport = useCallback(() => {
     if (!apiAvailable) {
@@ -117,10 +130,42 @@ export default function App() {
       })
       .catch(() => {
         setApiAvailable(false);
-        // Static Pages (or any host without Express): no noisy toast.
-        // Local `npm run dev` without the API still gets a quiet disabled import tip.
+        // Static Pages: seed read-only Chengdu demo tiles (no Express upload).
+        setLayers(getDemoLayers());
       });
   }, []);
+  /**
+   * After the globe reports a non-initial status, restore `#v=` / `?v=` once.
+   */
+  useEffect(() => {
+    if (shareReady) return;
+    const view = readShareViewFromLocation();
+    if (!view) {
+      setShareReady(true);
+      return;
+    }
+    if (status === "正在载入地球…") return;
+    map.current?.setCameraView(view, 0);
+    setShareReady(true);
+    notify("已打开分享视角");
+  }, [shareReady, notify, status]);
+  /**
+   * Copy a Pages-friendly camera deep link to the clipboard.
+   */
+  async function copyShareLink() {
+    const view = map.current?.getCameraView();
+    if (!view) {
+      notify("地图尚未就绪");
+      return;
+    }
+    const url = buildShareUrl(view);
+    try {
+      await navigator.clipboard.writeText(url);
+      notify("分享链接已复制");
+    } catch {
+      window.prompt("复制分享链接：", url);
+    }
+  }
   useEffect(() => {
     if (!toast) return;
     const id = setTimeout(() => setToast(""), 4500);
@@ -521,6 +566,7 @@ export default function App() {
           onStatus={setStatus}
           onLayerStatus={onLayerStatus}
           onBuildingsFailed={onBuildingsFailed}
+          onBimPick={onBimPick}
           onCamera={setHeight}
           terrain={terrain}
           buildings={buildings}
@@ -548,12 +594,23 @@ export default function App() {
           </button>
           <button
             className="settings-button icon-button"
+            aria-label="复制当前视角分享链接"
+            title="复制分享链接"
+            onClick={() => void copyShareLink()}
+          >
+            <Link2 size={20} />
+          </button>
+          <button
+            className="settings-button icon-button"
             aria-label="地图设置"
             onClick={() => setSettings(true)}
           >
             <Settings2 size={20} />
           </button>
         </div>
+        {bimPick && (
+          <PropertiesPanel info={bimPick} onClose={() => setBimPick(null)} />
+        )}
         <div className="map-tools">
           <button
             className="compass-button"

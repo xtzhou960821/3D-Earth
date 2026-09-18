@@ -5,7 +5,11 @@
  * @returns Browser-ready URL including Vite base
  */
 export function publicUrl(path: string): string {
-  const base = import.meta.env.BASE_URL || "/";
+  const env =
+    typeof import.meta !== "undefined"
+      ? (import.meta as ImportMeta & { env?: { BASE_URL?: string } }).env
+      : undefined;
+  const base = env?.BASE_URL || "/";
   const clean = path.replace(/^\//, "");
   return `${base}${clean}`;
 }

@@ -7,7 +7,7 @@
     "dev": "concurrently -k \"node --watch server/index.js\" \"vite --host 127.0.0.1\"",
     "build": "tsc -b && vite build",
     "start": "NODE_ENV=production node server/index.js",
-    "test": "node --test server/*.test.js",
+    "test": "node --experimental-strip-types --test server/*.test.js",
     "typecheck": "tsc -b"
   },
   "dependencies": {

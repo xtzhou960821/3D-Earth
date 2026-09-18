@@ -6,11 +6,18 @@ import {
   useState,
 } from "react";
 import * as C from "cesium";
-import type { Layer, MapHandle, Place } from "../types";
+import type { CameraView, Layer, MapHandle, Place } from "../types";
 import { places } from "../data/places";
 import { api } from "../lib/api";
 import { publicUrl } from "../lib/publicUrl";
 import { classifyOsmBuildingsError } from "../lib/ionStatus";
+import {
+  buildBimPickInfo,
+  rowsFromCesiumFeature,
+  type BimFeatureRecord,
+  type BimPickInfo,
+} from "../lib/bimPick";
+
 interface Props {
   selected: Place | null;
   visibleIds: string[];
@@ -22,11 +29,26 @@ interface Props {
   onCamera: (height: number) => void;
   /** Called when OSM Buildings fail so the parent can turn the toggle off. */
   onBuildingsFailed?: (message: string) => void;
+  /** BIM / feature pick result for the properties panel. */
+  onBimPick?: (info: BimPickInfo | null) => void;
   terrain: boolean;
   buildings: boolean;
   labels: boolean;
 }
+
 type Item = C.Model | C.Cesium3DTileset | C.Entity;
+
+type HighlightState =
+  | { kind: "model"; model: C.Model; previous?: C.Color }
+  | {
+      kind: "feature";
+      feature: { color: C.Color };
+      previous: C.Color;
+    };
+
+/**
+ * Cesium globe canvas with places, user layers, OSM buildings, and pick handling.
+ */
 export const Globe = forwardRef<MapHandle, Props>(function Globe(props, ref) {
   const container = useRef<HTMLDivElement>(null),
     viewer = useRef<C.Viewer | null>(null),
@@ -34,12 +56,86 @@ export const Globe = forwardRef<MapHandle, Props>(function Globe(props, ref) {
     loaded = useRef(new Map<string, Item>()),
     loading = useRef(new Set<string>()),
     osm = useRef<C.Cesium3DTileset | null>(null),
-    worldTerrain = useRef<C.CesiumTerrainProvider | null>(null);
+    worldTerrain = useRef<C.CesiumTerrainProvider | null>(null),
+    highlight = useRef<HighlightState | null>(null),
+    sidecarCache = useRef(new Map<string, BimFeatureRecord[] | null>());
   latest.current = props;
   const [ready, setReady] = useState(false);
+
   function request() {
     viewer.current?.scene.requestRender();
   }
+
+  /**
+   * Clear any active model/feature highlight.
+   */
+  function clearHighlight() {
+    const current = highlight.current;
+    if (!current) return;
+    if (current.kind === "model" && !current.model.isDestroyed()) {
+      current.model.color = current.previous || C.Color.WHITE;
+      current.model.colorBlendMode = C.ColorBlendMode.HIGHLIGHT;
+      current.model.colorBlendAmount = 0.5;
+      current.model.silhouetteSize = 0;
+    } else if (current.kind === "feature") {
+      current.feature.color = current.previous;
+    }
+    highlight.current = null;
+    request();
+  }
+
+  /**
+   * Highlight a whole glTF model with silhouette + tint.
+   * @param model Cesium Model primitive
+   */
+  function highlightModel(model: C.Model) {
+    clearHighlight();
+    const previous = model.color?.clone?.() || C.Color.WHITE.clone();
+    model.color = C.Color.fromCssColorString("#9bdcc4").withAlpha(1);
+    model.colorBlendMode = C.ColorBlendMode.MIX;
+    model.colorBlendAmount = 0.35;
+    model.silhouetteColor = C.Color.fromCssColorString("#efc17a");
+    model.silhouetteSize = 2.2;
+    highlight.current = { kind: "model", model, previous };
+    request();
+  }
+
+  /**
+   * Highlight a picked 3D Tiles / model feature when color is writable.
+   * @param feature Cesium feature-like object
+   */
+  function highlightFeature(feature: { color: C.Color }) {
+    clearHighlight();
+    const previous = C.Color.clone(feature.color, new C.Color());
+    feature.color = C.Color.fromCssColorString("#efc17a");
+    highlight.current = { kind: "feature", feature, previous };
+    request();
+  }
+
+  /**
+   * Load bim-properties.json sidecar once per layer.
+   * @param layer Model layer that may declare propertiesUrl
+   */
+  async function loadSidecar(layer: Layer): Promise<BimFeatureRecord[] | null> {
+    if (!layer.propertiesUrl) return null;
+    if (sidecarCache.current.has(layer.id))
+      return sidecarCache.current.get(layer.id) || null;
+    try {
+      const res = await fetch(layer.propertiesUrl);
+      if (!res.ok) {
+        sidecarCache.current.set(layer.id, null);
+        return null;
+      }
+      const data = (await res.json()) as BimFeatureRecord[];
+      const list = Array.isArray(data) ? data : null;
+      sidecarCache.current.set(layer.id, list);
+      return list;
+    } catch {
+      sidecarCache.current.set(layer.id, null);
+      return null;
+    }
+  }
+
   function flyTo(p: Place) {
     viewer.current?.camera.flyTo({
       destination: C.Cartesian3.fromDegrees(
@@ -51,6 +147,7 @@ export const Globe = forwardRef<MapHandle, Props>(function Globe(props, ref) {
       duration: 2.2,
     });
   }
+
   function home() {
     viewer.current?.camera.flyTo({
       destination: C.Cartesian3.fromDegrees(105, 32, 9500000),
@@ -58,6 +155,54 @@ export const Globe = forwardRef<MapHandle, Props>(function Globe(props, ref) {
       duration: 1.8,
     });
   }
+
+  /**
+   * Read the current camera pose for share links.
+   */
+  function getCameraView(): CameraView {
+    const v = viewer.current;
+    if (!v) {
+      return {
+        longitude: 105,
+        latitude: 32,
+        height: 9500000,
+        heading: 0,
+        pitch: -90,
+        roll: 0,
+      };
+    }
+    const c = v.camera.positionCartographic;
+    return {
+      longitude: Number(C.Math.toDegrees(c.longitude).toFixed(6)),
+      latitude: Number(C.Math.toDegrees(c.latitude).toFixed(6)),
+      height: Number(c.height.toFixed(1)),
+      heading: Number(C.Math.toDegrees(v.camera.heading).toFixed(2)),
+      pitch: Number(C.Math.toDegrees(v.camera.pitch).toFixed(2)),
+      roll: Number(C.Math.toDegrees(v.camera.roll).toFixed(2)),
+    };
+  }
+
+  /**
+   * Restore a shared camera pose.
+   * @param view Pose in degrees / meters
+   * @param duration Fly duration seconds
+   */
+  function setCameraView(view: CameraView, duration = 1.6) {
+    viewer.current?.camera.flyTo({
+      destination: C.Cartesian3.fromDegrees(
+        view.longitude,
+        view.latitude,
+        view.height,
+      ),
+      orientation: {
+        heading: C.Math.toRadians(view.heading),
+        pitch: C.Math.toRadians(view.pitch),
+        roll: C.Math.toRadians(view.roll),
+      },
+      duration,
+    });
+  }
+
   useImperativeHandle(ref, () => ({
     flyTo,
     home,
@@ -159,7 +304,10 @@ export const Globe = forwardRef<MapHandle, Props>(function Globe(props, ref) {
         height: Math.max(0, Math.round(point ? c.height : 0)),
       };
     },
+    getCameraView,
+    setCameraView,
   }));
+
   useEffect(() => {
     let disposed = false;
     let handler: C.ScreenSpaceEventHandler | undefined;
@@ -238,13 +386,81 @@ export const Globe = forwardRef<MapHandle, Props>(function Globe(props, ref) {
         handler.setInputAction((e: { position: C.Cartesian2 }) => {
           const hit = v.scene.pick(e.position);
           if (hit?.id instanceof C.Entity) {
+            clearHighlight();
+            latest.current.onBimPick?.(null);
             const p = places.find((x) => x.id === hit.id.id);
             if (p) latest.current.onSelect(p);
             const layer = latest.current.layers.find(
               (l) => l.id === hit.id.id && l.kind === "panorama",
             );
             if (layer) latest.current.onPanorama(layer);
+            return;
           }
+
+          const primitive = hit?.primitive;
+          const featureRows = rowsFromCesiumFeature(hit);
+
+          if (primitive instanceof C.Model) {
+            const layer = [...loaded.current.entries()].find(
+              ([, item]) => item === primitive,
+            );
+            const layerId = layer?.[0];
+            const meta = latest.current.layers.find((l) => l.id === layerId);
+            if (meta) {
+              highlightModel(primitive);
+              void loadSidecar(meta).then((sidecar) => {
+                const info = buildBimPickInfo({
+                  layerId: meta.id,
+                  layerName: meta.name,
+                  featureRows,
+                  sidecar,
+                });
+                latest.current.onBimPick?.(info);
+              });
+              return;
+            }
+          }
+
+          if (
+            primitive instanceof C.Cesium3DTileset ||
+            (hit && featureRows.length)
+          ) {
+            const layerEntry = [...loaded.current.entries()].find(([, item]) => {
+              if (item === primitive) return true;
+              if (
+                item instanceof C.Cesium3DTileset &&
+                hit &&
+                typeof (hit as { tileset?: C.Cesium3DTileset }).tileset !==
+                  "undefined"
+              )
+                return (
+                  (hit as { tileset?: C.Cesium3DTileset }).tileset === item
+                );
+              return false;
+            });
+            const meta = latest.current.layers.find(
+              (l) => l.id === layerEntry?.[0],
+            );
+            if (meta) {
+              if (
+                hit &&
+                typeof (hit as { color?: C.Color }).color !== "undefined"
+              ) {
+                highlightFeature(hit as { color: C.Color });
+              }
+              latest.current.onBimPick?.(
+                buildBimPickInfo({
+                  layerId: meta.id,
+                  layerName: meta.name,
+                  featureRows,
+                }),
+              );
+              return;
+            }
+          }
+
+          clearHighlight();
+          latest.current.onBimPick?.(null);
         }, C.ScreenSpaceEventType.LEFT_CLICK);
         v.camera.changed.addEventListener(() =>
           latest.current.onCamera(v.camera.positionCartographic.height),
@@ -297,6 +513,7 @@ export const Globe = forwardRef<MapHandle, Props>(function Globe(props, ref) {
     })();
     return () => {
       disposed = true;
+      clearHighlight();
       handler?.destroy();
       if (viewer.current && !viewer.current.isDestroyed())
         viewer.current.destroy();
@@ -305,9 +522,11 @@ export const Globe = forwardRef<MapHandle, Props>(function Globe(props, ref) {
       loading.current.clear();
       osm.current = null;
       worldTerrain.current = null;
+      sidecarCache.current.clear();
       setReady(false);
     };
   }, []);
+
   useEffect(() => {
     if (!ready || !viewer.current) return;
     const visible = new Set(props.visibleIds);
@@ -324,6 +543,7 @@ export const Globe = forwardRef<MapHandle, Props>(function Globe(props, ref) {
     }
     request();
   }, [ready, props.visibleIds, props.labels, props.selected]);
+
   useEffect(() => {
     if (viewer.current)
       viewer.current.terrainProvider =
@@ -332,6 +552,7 @@ export const Globe = forwardRef<MapHandle, Props>(function Globe(props, ref) {
           : new C.EllipsoidTerrainProvider();
     request();
   }, [ready, props.terrain]);
+
   useEffect(() => {
     let cancelled = false;
     const v = viewer.current;
@@ -372,16 +593,20 @@ export const Globe = forwardRef<MapHandle, Props>(function Globe(props, ref) {
       cancelled = true;
     };
   }, [ready, props.buildings]);
+
   useEffect(() => {
     const v = viewer.current;
     if (!ready || !v) return;
     const ids = new Set(props.layers.map((l) => l.id));
     for (const [id, item] of loaded.current) {
       if (!ids.has(id)) {
+        if (highlight.current?.kind === "model" && highlight.current.model === item)
+          clearHighlight();
         item instanceof C.Entity
           ? v.entities.remove(item)
           : v.scene.primitives.remove(item);
         loaded.current.delete(id);
+        sidecarCache.current.delete(id);
       }
     }
     function apply(item: Item, layer: Layer) {
@@ -435,6 +660,7 @@ export const Globe = forwardRef<MapHandle, Props>(function Globe(props, ref) {
               },
             });
           } else if (layer.kind === "tiles" || layer.kind === "ion") {
+            latest.current.onLayerStatus(layer.id, "加载瓦片索引…");
             item =
               layer.kind === "ion"
                 ? await C.Cesium3DTileset.fromIonAssetId(layer.assetId!)
@@ -444,12 +670,37 @@ export const Globe = forwardRef<MapHandle, Props>(function Globe(props, ref) {
               return;
             }
             v.scene.primitives.add(item);
-            item.tileFailed.addEventListener(() =>
+            item.loadProgress.addEventListener(
+              (numPending: number, numProcessing: number) => {
+                const pending = numPending + numProcessing;
+                if (pending <= 0) {
+                  latest.current.onLayerStatus(layer.id, "已加载");
+                  return;
+                }
+                latest.current.onLayerStatus(
+                  layer.id,
+                  `加载瓦片中… 待处理 ${pending}`,
+                );
+              },
+            );
+            item.allTilesLoaded.addEventListener(() => {
+              latest.current.onLayerStatus(layer.id, "已加载");
+              request();
+            });
+            item.tileFailed.addEventListener((error: unknown) => {
+              const err = error as { url?: string; message?: string };
+              const raw = err?.url || err?.message || "";
+              const short =
+                typeof raw === "string"
+                  ? raw.split("/").pop()?.split("?")[0] || raw.slice(0, 48)
+                  : "";
               latest.current.onLayerStatus(
                 layer.id,
-                "部分瓦片加载失败，请检查文件完整性",
-              ),
-            );
+                short
+                  ? `部分瓦片加载失败：${short}`
+                  : "部分瓦片加载失败，请检查文件完整性或网络",
+              );
+            });
           } else {
             item = await C.Model.fromGltfAsync({
               url: layer.url!,
@@ -469,9 +720,20 @@ export const Globe = forwardRef<MapHandle, Props>(function Globe(props, ref) {
               return;
             }
             v.scene.primitives.add(item);
-            item.errorEvent.addEventListener(() =>
-              latest.current.onLayerStatus(layer.id, "模型资源加载失败"),
-            );
+            item.errorEvent.addEventListener((error: unknown) => {
+              const msg =
+                error instanceof Error
+                  ? error.message
+                  : typeof error === "string"
+                    ? error
+                    : "";
+              latest.current.onLayerStatus(
+                layer.id,
+                msg
+                  ? `模型资源加载失败：${msg.slice(0, 80)}`
+                  : "模型资源加载失败",
+              );
+            });
           }
           const current = latest.current.layers.find((l) => l.id === layer.id);
           if (!current) {
@@ -488,14 +750,24 @@ export const Globe = forwardRef<MapHandle, Props>(function Globe(props, ref) {
               latest.current.onLayerStatus(layer.id, "已加载");
               request();
             });
-          } else {
+          } else if (!(item instanceof C.Cesium3DTileset)) {
             latest.current.onLayerStatus(layer.id, "已加载");
+          } else {
+            latest.current.onLayerStatus(layer.id, "加载瓦片中…");
           }
           request();
-        } catch {
+        } catch (err) {
+          const detail =
+            err instanceof Error
+              ? err.message
+              : typeof err === "string"
+                ? err
+                : "";
           latest.current.onLayerStatus(
             layer.id,
-            "加载失败，请检查格式、资源路径或 ion 权限",
+            detail
+              ? `加载失败：${detail.slice(0, 100)}`
+              : "加载失败，请检查格式、资源路径或 ion 权限",
           );
         } finally {
           loading.current.delete(layer.id);
@@ -504,6 +776,7 @@ export const Globe = forwardRef<MapHandle, Props>(function Globe(props, ref) {
     }
     request();
   }, [ready, props.layers]);
+
   return (
     <div ref={container} className="globe-canvas" aria-label="交互式三维地球" />
   );
