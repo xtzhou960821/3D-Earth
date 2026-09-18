@@ -16,7 +16,7 @@ import {
 import type { CheckIn, Place } from "../types";
 import { hotels } from "../data/hotels";
 import { publicUrl } from "../lib/publicUrl";
-import { getHeritageAlbumUrl } from "../data/heritageAlbums";
+import { getHeritageAlbumUrl, getRelatedHeritageAlbums } from "../data/heritageAlbums";
 
 /**
  * Destination detail panel: intro, nearby lodging, optional heritage album link/iframe.
@@ -50,6 +50,7 @@ export default function PlaceDetail({
     "idle",
   );
   const albumUrl = getHeritageAlbumUrl(place.id);
+  const relatedAlbums = getRelatedHeritageAlbums(place.id);
   const search = (q: string) =>
     `https://uri.amap.com/search?keyword=${encodeURIComponent(q)}&city=${encodeURIComponent(place.region.split(" · ")[1])}&view=map&src=shanhai-earth`;
 
@@ -234,6 +235,19 @@ export default function PlaceDetail({
                       onError={() => setEmbedState("blocked")}
                     />
                   )}
+                {relatedAlbums.length > 0 && (
+                  <p className="heritage-related">
+                    <span>阿里大环线公开子册：</span>
+                    {relatedAlbums.map((item, i) => (
+                      <span key={item.href}>
+                        {i > 0 ? " · " : ""}
+                        <a href={item.href} target="_blank" rel="noreferrer">
+                          {item.title}
+                        </a>
+                      </span>
+                    ))}
+                  </p>
+                )}
               </div>
             )}
             <section className="hours">

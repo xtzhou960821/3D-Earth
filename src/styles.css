@@ -886,6 +886,19 @@ small {
 .heritage-block {
   margin: 8px 0 0;
 }
+.heritage-related {
+  margin: 10px 0 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #9eb8bc;
+}
+.heritage-related a {
+  color: #c9a46a;
+  text-decoration: none;
+}
+.heritage-related a:hover {
+  text-decoration: underline;
+}
 .heritage-link {
   margin: 0;
 }

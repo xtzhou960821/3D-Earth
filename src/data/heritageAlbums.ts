@@ -36,6 +36,39 @@ export function getHeritageAlbumUrl(placeId: string): string | undefined {
   return heritageAlbums[placeId];
 }
 
+/**
+ * Related public album pages that belong to a ring / circuit but are not
+ * separate Earth destinations (deep-links only).
+ */
+export const relatedHeritageAlbums: Readonly<
+  Record<string, ReadonlyArray<{ title: string; href: string }>>
+> = {
+  ali: [
+    {
+      title: "班公湖",
+      href: `${HERITAGE_PAGES_BASE}/tibet-bangong.html`,
+    },
+    {
+      title: "圣湖雪山",
+      href: `${HERITAGE_PAGES_BASE}/tibet-sacred.html`,
+    },
+    {
+      title: "扎达土林",
+      href: `${HERITAGE_PAGES_BASE}/tibet-zhada.html`,
+    },
+  ],
+};
+
+/**
+ * Related catalog-only album links for a place (e.g. Ali ring sub-pages).
+ * @param placeId Earth place id
+ */
+export function getRelatedHeritageAlbums(
+  placeId: string,
+): ReadonlyArray<{ title: string; href: string }> {
+  return relatedHeritageAlbums[placeId] ?? [];
+}
+
 /** Catalog entries for the thin `/heritage/` index (deep-links only). */
 export const heritageCatalog: ReadonlyArray<{
   title: string;
