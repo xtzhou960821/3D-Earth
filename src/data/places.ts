@@ -386,4 +386,25 @@ export const places: Place[] = [
     stay: ["篁岭景区内住宿", "婺源县城酒店"],
     food: ["糊豆腐", "清蒸荷包红鲤", "婺源绿茶"],
   },
+  {
+    id: "tongjiang",
+    name: "桐江书院",
+    en: "TONGJIANG ACADEMY",
+    region: "浙江 · 台州 · 仙居",
+    category: "人文古迹",
+    lon: 120.537,
+    lat: 28.741,
+    altitude: 120,
+    distance: 3500,
+    description:
+      "书院坐落于仙居皤滩乡山下村一带，南宋乾道年间由方斫举资创建，历经宋、元、明、清数百年，被誉为「江南第一书院」。门前苦槠古树相传与朱熹讲学相关；灰墙黑瓦与鼎山堂、大成殿，把理学文脉留在永安溪畔的田园里。",
+    hours: "以景区当日公告为准",
+    hoursNote:
+      "开放时段、票务与临时封闭随季节与活动调整；请出发前查看仙居文旅 / 景区当日公告，勿凭印象推断实时开放状态。",
+    source: "https://zh.wikipedia.org/wiki/%E7%9A%A4%E6%BB%A9%E4%B9%A1",
+    image: "/places/tongjiang.jpg",
+    highlights: ["鼎山堂", "苦槠古树", "皤滩古镇"],
+    stay: ["仙居城区酒店", "皤滩古镇民宿"],
+    food: ["仙居杨梅", "豆腐圆", "永安溪鱼鲜"],
+  },
 ];

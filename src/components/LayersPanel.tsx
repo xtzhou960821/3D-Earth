@@ -212,7 +212,9 @@ export default function LayersPanel({
                   <Focus size={14} />
                   {l.kind === "panorama" ? "打开全景" : "定位"}
                 </button>
-                {l.kind === "model" && !l.readOnly && importEnabled && (
+                {(l.kind === "model" || l.kind === "panorama") &&
+                  !l.readOnly &&
+                  importEnabled && (
                   <button
                     onClick={() => setEdit(edit?.id === l.id ? null : { ...l })}
                   >
@@ -253,6 +255,17 @@ export default function LayersPanel({
                   <p className="layer-edit-summary">
                     当前：{positionLabel(edit)}
                   </p>
+                  <label>
+                    名称
+                    <input
+                      required
+                      maxLength={100}
+                      value={edit.name}
+                      onChange={(e) =>
+                        setEdit({ ...edit, name: e.target.value })
+                      }
+                    />
+                  </label>
                   <div className="form-grid">
                     {(
                       [
@@ -269,18 +282,22 @@ export default function LayersPanel({
                           min: -10000,
                           max: 1e7,
                         },
-                        {
-                          key: "heading",
-                          label: "旋转（度）",
-                          min: -360,
-                          max: 360,
-                        },
-                        {
-                          key: "scale",
-                          label: "缩放比例",
-                          min: 0.001,
-                          max: 10000,
-                        },
+                        ...(edit.kind === "model"
+                          ? ([
+                              {
+                                key: "heading",
+                                label: "旋转（度）",
+                                min: -360,
+                                max: 360,
+                              },
+                              {
+                                key: "scale",
+                                label: "缩放比例",
+                                min: 0.001,
+                                max: 10000,
+                              },
+                            ] as const)
+                          : []),
                       ] as const
                     ).map((f) => (
                       <label key={f.key}>

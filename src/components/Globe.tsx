@@ -17,6 +17,7 @@ import {
   type BimFeatureRecord,
   type BimPickInfo,
 } from "../lib/bimPick";
+import { getPanoramaPresentation } from "../lib/layerView";
 
 interface Props {
   selected: Place | null;
@@ -621,6 +622,18 @@ export const Globe = forwardRef<MapHandle, Props>(function Globe(props, ref) {
           new C.HeadingPitchRoll(C.Math.toRadians(layer.heading), 0, 0),
         );
         item.scale = layer.scale;
+      } else if (item instanceof C.Entity && layer.kind === "panorama") {
+        const view = getPanoramaPresentation(layer);
+        item.position = new C.ConstantPositionProperty(
+          C.Cartesian3.fromDegrees(
+            view.longitude,
+            view.latitude,
+            view.markerHeight,
+          ),
+        );
+        if (item.label) {
+          item.label.text = new C.ConstantProperty(view.label);
+        }
       }
     }
     for (const layer of props.layers) {
@@ -636,12 +649,13 @@ export const Globe = forwardRef<MapHandle, Props>(function Globe(props, ref) {
         try {
           let item: Item;
           if (layer.kind === "panorama") {
+            const view = getPanoramaPresentation(layer);
             item = v.entities.add({
               id: layer.id,
               position: C.Cartesian3.fromDegrees(
-                layer.longitude,
-                layer.latitude,
-                layer.height + 4,
+                view.longitude,
+                view.latitude,
+                view.markerHeight,
               ),
               billboard: {
                 image: new C.PinBuilder()
@@ -651,7 +665,7 @@ export const Globe = forwardRef<MapHandle, Props>(function Globe(props, ref) {
                 disableDepthTestDistance: Infinity,
               },
               label: {
-                text: layer.name,
+                text: view.label,
                 font: "13px sans-serif",
                 pixelOffset: new C.Cartesian2(0, 15),
                 style: C.LabelStyle.FILL_AND_OUTLINE,

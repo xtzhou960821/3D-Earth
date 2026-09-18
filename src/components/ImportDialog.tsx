@@ -13,11 +13,17 @@ import {
 import Modal from "./Modal";
 import type { Layer } from "../types";
 import { uploadLayer } from "../lib/api";
+import { readPhotoLocation } from "../lib/photoLocation";
+
 interface Props {
   onClose: () => void;
   onImported: (l: Layer) => void;
   position: { longitude: number; latitude: number; height: number };
 }
+
+/** UI status while reading panorama EXIF GPS. */
+type GpsStatus = "" | "reading" | "gps-found" | "no-gps";
+
 /**
  * Import dialog for models, tilesets, panoramas, and ion assets.
  */
@@ -37,9 +43,11 @@ export default function ImportDialog({ onClose, onImported, position }: Props) {
     [busy, setBusy] = useState(false),
     [status, setStatus] = useState(""),
     [progress, setProgress] = useState<number | null>(null),
-    [error, setError] = useState("");
+    [error, setError] = useState(""),
+    [gpsStatus, setGpsStatus] = useState<GpsStatus>("");
   const fileInput = useRef<HTMLInputElement>(null),
-    folderInput = useRef<HTMLInputElement>(null);
+    folderInput = useRef<HTMLInputElement>(null),
+    gpsToken = useRef(0);
   const choices = [
     { id: "model" as const, label: "BIM / 模型", icon: Box },
     { id: "tiles" as const, label: "三维实景", icon: FolderOpen },
@@ -53,6 +61,25 @@ export default function ImportDialog({ onClose, onImported, position }: Props) {
         ? /\.(jpg|jpeg|png|webp)$/i.test(f.name)
         : /\.(glb|gltf|ifc|obj)$/i.test(f.name),
   );
+  /**
+   * Prefill lon/lat/height from panorama EXIF GPS when available.
+   * @param file Selected panorama image
+   */
+  async function applyPanoramaGps(file: File) {
+    const token = ++gpsToken.current;
+    setGpsStatus("reading");
+    const loc = await readPhotoLocation(file);
+    if (token !== gpsToken.current) return;
+    if (!loc) {
+      setGpsStatus("no-gps");
+      return;
+    }
+    setLon(String(loc.longitude));
+    setLat(String(loc.latitude));
+    if (loc.height != null) setHeight(String(loc.height));
+    setGpsStatus("gps-found");
+  }
+
   /**
    * Apply a file list selection and guess the entry path.
    * @param list Files from picker or drop
@@ -69,6 +96,11 @@ export default function ImportDialog({ onClose, onImported, position }: Props) {
     );
     setEntry(file?.webkitRelativePath || file?.name || "");
     if (file && !name) setName(file.name.replace(/\.[^.]+$/, ""));
+    if (type === "panorama" && file) {
+      void applyPanoramaGps(file);
+    } else {
+      setGpsStatus("");
+    }
   }
   /**
    * Switch import kind and clear the current selection.
@@ -80,6 +112,8 @@ export default function ImportDialog({ onClose, onImported, position }: Props) {
     setEntry("");
     setError("");
     setProgress(null);
+    setGpsStatus("");
+    gpsToken.current += 1;
   }
   /**
    * Validate, convert when needed, and upload to the local Express API.
@@ -294,7 +328,16 @@ export default function ImportDialog({ onClose, onImported, position }: Props) {
                   <select
                     required
                     value={entry}
-                    onChange={(e) => setEntry(e.target.value)}
+                    onChange={(e) => {
+                      const next = e.target.value;
+                      setEntry(next);
+                      if (type === "panorama") {
+                        const file = files.find(
+                          (f) => (f.webkitRelativePath || f.name) === next,
+                        );
+                        if (file) void applyPanoramaGps(file);
+                      }
+                    }}
                   >
                     <option value="">选择模型 / tileset.json / 全景图片</option>
                     {candidates.map((f) => (
@@ -325,7 +368,15 @@ export default function ImportDialog({ onClose, onImported, position }: Props) {
               <div className="form-section-title">
                 <MapPin size={15} />
                 <span>放置位置</span>
-                <small>WGS84 · 已取当前地图中心</small>
+                <small>
+                  {type === "panorama" && gpsStatus === "reading"
+                    ? "WGS84 · 正在读取照片 GPS…"
+                    : type === "panorama" && gpsStatus === "gps-found"
+                      ? "WGS84 · 已从 EXIF GPS 预填"
+                      : type === "panorama" && gpsStatus === "no-gps"
+                        ? "WGS84 · 未找到 GPS，已用当前地图中心"
+                        : "WGS84 · 已取当前地图中心"}
+                </small>
               </div>
               <div className="form-grid">
                 <label>
@@ -417,7 +468,7 @@ export default function ImportDialog({ onClose, onImported, position }: Props) {
               : type === "tiles"
                 ? "请选择包含 tileset.json、瓦片和纹理的完整文件夹，使用模型自带地理定位。OSGB 请先转换为 3D Tiles；单独 B3DM 文件不能直接定位。"
                 : type === "panorama"
-                  ? "文件保存在这台电脑，导入后点击地图上的 360 标记即可进入全景。"
+                  ? "文件保存在这台电脑。若照片含 EXIF GPS（如大疆全景），将自动预填经纬高；也可手动修改。导入后点击地图上的 360 标记即可进入全景。"
                   : "资源必须为已切片的 3D Tiles，且访问令牌具备该资源的读取权限。"}
           </p>
           {busy && progress != null && (
