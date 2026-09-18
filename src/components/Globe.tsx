@@ -659,7 +659,7 @@ export const Globe = forwardRef<MapHandle, Props>(function Globe(props, ref) {
               ),
               billboard: {
                 image: new C.PinBuilder()
-                  .fromText("360", C.Color.fromCssColorString("#b5a4ed"), 46)
+                  .fromText("720全景", C.Color.fromCssColorString("#b5a4ed"), 52)
                   .toDataURL(),
                 verticalOrigin: C.VerticalOrigin.BOTTOM,
                 disableDepthTestDistance: Infinity,

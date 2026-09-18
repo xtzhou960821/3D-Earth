@@ -37,7 +37,7 @@ export function getDemoLayers(): Layer[] {
     },
     {
       id: DEMO_PANO_JIAOJIANG_ID,
-      name: "示例 · 椒江大桥公园全景",
+      name: "示例 · 椒江大桥公园720全景",
       kind: "panorama",
       longitude: 121.382287,
       latitude: 28.689258,
@@ -53,7 +53,7 @@ export function getDemoLayers(): Layer[] {
     },
     {
       id: DEMO_PANO_TONGJIANG_ID,
-      name: "示例 · 仙居桐江书院全景",
+      name: "示例 · 仙居桐江书院720全景",
       kind: "panorama",
       longitude: 120.55516,
       latitude: 28.744724,

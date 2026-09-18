@@ -17,7 +17,7 @@ export interface PanoramaPresentation {
   label: string;
 }
 
-/** Extra meters so the 360° pin sits above the ground sample. */
+/** Extra meters so the 720 panorama pin sits above the ground sample. */
 export const PANORAMA_MARKER_OFFSET_M = 4;
 
 /**
