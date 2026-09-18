@@ -279,7 +279,7 @@ export default function PlaceDetail({
                 <strong>换个视角，看这里</strong>
                 <small>
                   {importEnabled
-                    ? "导入你拍摄的 720° 全景"
+                    ? "导入你拍摄的720全景"
                     : "完整导入能力请本机 npm start"}
                 </small>
               </span>

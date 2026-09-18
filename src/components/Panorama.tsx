@@ -19,7 +19,7 @@ export default function Panorama({
     try {
       renderer = new THREE.WebGLRenderer({ antialias: true });
     } catch {
-      setError("当前浏览器无法创建全景视图，请检查 WebGL 支持");
+      setError("当前浏览器无法创建720全景视图，请检查 WebGL 支持");
       setLoading(false);
       return;
     }
@@ -55,7 +55,7 @@ export default function Panorama({
       undefined,
       () => {
         setLoading(false);
-        setError("全景图片加载失败，请检查文件是否仍然存在");
+        setError("720全景图片加载失败，请检查文件是否仍然存在");
       },
     );
     function render() {
@@ -158,11 +158,11 @@ export default function Panorama({
       className="panorama-overlay"
       role="dialog"
       aria-modal="true"
-      aria-label="720° 全景浏览"
+      aria-label="720全景浏览"
     >
       <div className="panorama-canvas" ref={host} />
       <div className="panorama-heading">
-        <span className="panorama-tag">720°</span>
+        <span className="panorama-tag">720全景</span>
         <div>
           <h2>{layer.name}</h2>
           <p>拖动环视 · 滚轮缩放 · 方向键转动</p>
@@ -171,14 +171,14 @@ export default function Panorama({
       <div className="panorama-actions">
         <button
           className="icon-button"
-          aria-label="重置全景视角"
+          aria-label="重置720全景视角"
           onClick={() => host.current?.dispatchEvent(new Event("reset-view"))}
         >
           <RotateCcw />
         </button>
         <button
           className="icon-button"
-          aria-label="全屏全景"
+          aria-label="全屏720全景"
           onClick={() => {
             if (document.fullscreenElement) void document.exitFullscreen();
             else
@@ -192,7 +192,7 @@ export default function Panorama({
         <button
           autoFocus
           className="icon-button"
-          aria-label="关闭全景"
+          aria-label="关闭720全景"
           onClick={onClose}
         >
           <X />
@@ -201,7 +201,7 @@ export default function Panorama({
       {loading && (
         <div className="center-message">
           <LoaderCircle className="spin" />
-          正在载入全景…
+          正在载入720全景…
         </div>
       )}
       {error && <div className="center-message error">{error}</div>}

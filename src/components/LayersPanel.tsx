@@ -146,7 +146,7 @@ export default function LayersPanel({
         <div className="empty-state">
           <Layers size={38} />
           <h3>地球上，还差你的故事</h3>
-          <p>导入 BIM 模型、航测实景或全景照片，在地图上留下自己的视角。</p>
+          <p>导入 BIM 模型、航测实景或720全景照片，在地图上留下自己的视角。</p>
         </div>
       ) : (
         <div className="layer-list">
@@ -210,7 +210,7 @@ export default function LayersPanel({
                   }
                 >
                   <Focus size={14} />
-                  {l.kind === "panorama" ? "打开全景" : "定位"}
+                  {l.kind === "panorama" ? "打开720全景" : "定位"}
                 </button>
                 {(l.kind === "model" || l.kind === "panorama") &&
                   !l.readOnly &&

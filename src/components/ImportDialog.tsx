@@ -51,7 +51,7 @@ export default function ImportDialog({ onClose, onImported, position }: Props) {
   const choices = [
     { id: "model" as const, label: "BIM / 模型", icon: Box },
     { id: "tiles" as const, label: "三维实景", icon: FolderOpen },
-    { id: "panorama" as const, label: "720° 全景", icon: Camera },
+    { id: "panorama" as const, label: "720全景", icon: Camera },
     { id: "ion" as const, label: "Cesium ion", icon: Cloud },
   ];
   const candidates = files.filter((f) =>
@@ -135,7 +135,7 @@ export default function ImportDialog({ onClose, onImported, position }: Props) {
       if (type !== "ion" && !chosen)
         throw new Error("请选择对应类型的入口文件");
       if (type === "panorama") {
-        setStatus("正在检查全景图片…");
+        setStatus("正在检查720全景图片…");
         const { validatePanorama } = await import("../lib/convert");
         await validatePanorama(chosen!);
         uploadFiles = [chosen!];
@@ -217,7 +217,7 @@ export default function ImportDialog({ onClose, onImported, position }: Props) {
   return (
     <Modal
       title="把你的世界，放上地球"
-      subtitle="导入模型与全景，让每一个地点更立体。"
+      subtitle="导入模型与720全景，让每一个地点更立体。"
       onClose={onClose}
       wide
       busy={busy}
@@ -278,7 +278,7 @@ export default function ImportDialog({ onClose, onImported, position }: Props) {
                     ? "IFC · GLB · glTF · OBJ（含 MTL 与纹理）"
                     : type === "tiles"
                       ? "大疆智图 B3DM / 3D Tiles 完整目录"
-                      : "JPG · PNG · WebP / 2:1 等距柱状全景图"}
+                      : "JPG · PNG · WebP / 2:1 等距柱状720全景图"}
                 </p>
                 <div className="file-actions">
                   <button
@@ -339,7 +339,7 @@ export default function ImportDialog({ onClose, onImported, position }: Props) {
                       }
                     }}
                   >
-                    <option value="">选择模型 / tileset.json / 全景图片</option>
+                    <option value="">选择模型 / tileset.json / 720全景图片</option>
                     {candidates.map((f) => (
                       <option
                         key={f.webkitRelativePath || f.name}
@@ -468,7 +468,7 @@ export default function ImportDialog({ onClose, onImported, position }: Props) {
               : type === "tiles"
                 ? "请选择包含 tileset.json、瓦片和纹理的完整文件夹，使用模型自带地理定位。OSGB 请先转换为 3D Tiles；单独 B3DM 文件不能直接定位。"
                 : type === "panorama"
-                  ? "文件保存在这台电脑。若照片含 EXIF GPS（如大疆全景），将自动预填经纬高；也可手动修改。导入后点击地图上的 360 标记即可进入全景。"
+                  ? "文件保存在这台电脑。若照片含 EXIF GPS（如大疆全景），将自动预填经纬高；也可手动修改。导入后点击地图上的 720全景 标记即可进入全景。"
                   : "资源必须为已切片的 3D Tiles，且访问令牌具备该资源的读取权限。"}
           </p>
           {busy && progress != null && (
