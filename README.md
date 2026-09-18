@@ -61,7 +61,7 @@ Cesium ion 令牌配置在 `.env`（该文件被版本控制忽略）。新机�
 | --- | --- | --- |
 | 三维地球浏览 / 目的地 / 相册深链 | ✅ | ✅（相册内容在 xixia 公开 Pages） |
 | 收藏 / 打卡 / 旅行记录导入导出 | ✅（当前浏览器 localStorage） | ✅（当前浏览器 localStorage） |
-| `/api/layers` 上传、持久化、删除 | ✅ Express | ❌ 无后端；灰显导入，并自动挂载只读成都 `demo-tiles` 示例 |
+| `/api/layers` 上传、持久化、删除 | ✅ Express | ❌ 无后端；灰显导入；自动挂载只读成都 `demo-tiles` + 两张压缩演示全景（椒江大桥公园 / 仙居桐江书院） |
 | 分享视角深链 `#v=…` | ✅ | ✅（hash，无后端） |
 | BIM 点击属性面板 | ✅（有元数据时） | ✅（无 batch/extras 时为空状态） |
 | Cesium ion 令牌 | `.env` → `/api/config` | 可选 Secret `VITE_CESIUM_ION_TOKEN`（写入前端包；请用受限客户端令牌；**未配置时静默基础地球**） |
@@ -81,7 +81,8 @@ Cesium ion 令牌配置在 `.env`（该文件被版本控制忽略）。新机�
 - 每个景点提供一间有公开来源的具体酒店参考、周边住宿区域与地方美食查询入口，点击查看酒店资料或在高德地图搜索。**当前不包含内嵌的实时酒店房价、餐厅评分和商户 POI 列表。**
 - 本地模型 / 全景文件持久化、图层加载状态（含 3D Tiles 瓦片进度与失败文件名）、隐藏显示、定位、经纬度/高程微调（±1m/±10m）/ 旋转 / 比例、删除（本机 Express）。
 - **BIM 轻量拾取**：点击模型或带属性表的瓦片 → 高亮 + 属性面板；IFC→GLB 写入 `bim-properties.json` / glTF extras。无元数据时显示空状态。不含 RVT/OSGB 直转。
-- **GitHub Pages 只读示例**：无 Express 时自动加载 `examples/tiles`（成都 B3DM → `demo-tiles/`）。
+- **GitHub Pages 只读示例**：无 Express 时自动加载 `examples/tiles`（成都 B3DM → `demo-tiles/`），以及 `public/demo-panoramas/` 中两张约 4K 压缩全景（椒江大桥公园、桐江书院；原片仍在本机 `720全景/`，已 gitignore，勿提交）。
+- **本机加载已有全景**：项目根保留 gitignore 的 `720全景/`（或任意 JPG），执行 `npm start`（或 `npm run dev`），用「导入我的内容」选全景；清单写入本机 `data/layers.json`，文件进 `uploads/`。Pages 只显示仓库内 `public/demo-panoramas/` 压缩演示片，不会自动同步本机原片。
 - 桌面布局与手机折叠侧栏、键盘可用的对话框和全景转动。
 - 旅行相册深链（`heritageAlbums` 映射 + `/heritage/` 轻量索引），上述 10 处已互链公开站相册；另有 3 处西藏子册为公开相册深链。
 
