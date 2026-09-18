@@ -4,6 +4,7 @@ dist/
 .env.*
 !.env.example
 /data/
+/720全景/
 .DS_Store
 *.log
 

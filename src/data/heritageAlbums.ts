@@ -9,7 +9,8 @@ export const HERITAGE_PAGES_BASE =
  * Earth place id → public album page URL.
  * Only map destinations that have a real public `*.html` on xixia-heritage.
  * Public album pages today: helan-mountain, xixia-tomb, baota-mountain,
- * hukou-waterfall, tibet-ali, chengdu, huangshan, wuyuan, tibet-lhasa.
+ * hukou-waterfall, tibet-ali, chengdu, huangshan, wuyuan, tibet-lhasa,
+ * tongjiang-academy; plus Tibet sub-albums listed as catalog-only.
  * No pages (do not invent): palace, greatwall, jiuzhai, westlake,
  * zhangjiajie, terracotta, guilin, bund, mogao, lijiang, etc.
  */
@@ -23,6 +24,7 @@ export const heritageAlbums: Readonly<Record<string, string>> = {
   ali: `${HERITAGE_PAGES_BASE}/tibet-ali.html`,
   chengdu: `${HERITAGE_PAGES_BASE}/chengdu.html`,
   wuyuan: `${HERITAGE_PAGES_BASE}/wuyuan.html`,
+  tongjiang: `${HERITAGE_PAGES_BASE}/tongjiang-academy.html`,
 };
 
 /**
@@ -85,5 +87,25 @@ export const heritageCatalog: ReadonlyArray<{
     title: "婺源",
     href: `${HERITAGE_PAGES_BASE}/wuyuan.html`,
     note: "地球目的地互链",
+  },
+  {
+    title: "桐江书院",
+    href: `${HERITAGE_PAGES_BASE}/tongjiang-academy.html`,
+    note: "地球目的地互链",
+  },
+  {
+    title: "班公湖",
+    href: `${HERITAGE_PAGES_BASE}/tibet-bangong.html`,
+    note: "公开相册",
+  },
+  {
+    title: "圣湖雪山",
+    href: `${HERITAGE_PAGES_BASE}/tibet-sacred.html`,
+    note: "公开相册",
+  },
+  {
+    title: "扎达土林",
+    href: `${HERITAGE_PAGES_BASE}/tibet-zhada.html`,
+    note: "公开相册",
   },
 ];

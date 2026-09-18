@@ -107,4 +107,9 @@ export const hotels: Record<string, HotelReference> = {
     area: "婺源篁岭 · 景区内/近景区住宿",
     source: "https://www.wyhl.cc/",
   },
+  tongjiang: {
+    name: "如家精选（台州市仙居吾悦广场店）",
+    area: "仙居城区 · 前往皤滩 / 桐江书院需乘车",
+    source: "https://www.bthhotels.com/hotel/J57601",
+  },
 };
