@@ -112,4 +112,14 @@ export const hotels: Record<string, HotelReference> = {
     area: "仙居城区 · 前往皤滩 / 桐江书院需乘车",
     source: "https://www.bthhotels.com/hotel/J57601",
   },
+  jinan: {
+    name: "济南怡豪大饭店（泉城广场大明湖店）",
+    area: "历下区泺源大街 · 步行可至芙蓉街与泉城广场",
+    source: "https://jinansilverplaza.sofitels.cn/",
+  },
+  qingdao: {
+    name: "青岛香格里拉",
+    area: "香港中路 · 五四广场，前往奥帆中心需短途",
+    source: "https://www.shangri-la.com/cn/qingdao/shangrila/about/",
+  },
 };

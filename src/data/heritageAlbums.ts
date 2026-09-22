@@ -10,7 +10,8 @@ export const HERITAGE_PAGES_BASE =
  * Only map destinations that have a real public `*.html` on xixia-heritage.
  * Public album pages today: helan-mountain, xixia-tomb, baota-mountain,
  * hukou-waterfall, tibet-ali, chengdu, huangshan, wuyuan, tibet-lhasa,
- * tongjiang-academy; plus Tibet sub-albums listed as catalog-only.
+ * tongjiang-academy, jinan-qingdao; plus Tibet sub-albums listed as catalog-only.
+ * Jinan and Qingdao share one album page (`jinan-qingdao.html`).
  * No pages (do not invent): palace, greatwall, jiuzhai, westlake,
  * zhangjiajie, terracotta, guilin, bund, mogao, lijiang, etc.
  */
@@ -25,6 +26,8 @@ export const heritageAlbums: Readonly<Record<string, string>> = {
   chengdu: `${HERITAGE_PAGES_BASE}/chengdu.html`,
   wuyuan: `${HERITAGE_PAGES_BASE}/wuyuan.html`,
   tongjiang: `${HERITAGE_PAGES_BASE}/tongjiang-academy.html`,
+  jinan: `${HERITAGE_PAGES_BASE}/jinan-qingdao.html`,
+  qingdao: `${HERITAGE_PAGES_BASE}/jinan-qingdao.html`,
 };
 
 /**
@@ -124,6 +127,11 @@ export const heritageCatalog: ReadonlyArray<{
   {
     title: "桐江书院",
     href: `${HERITAGE_PAGES_BASE}/tongjiang-academy.html`,
+    note: "地球目的地互链",
+  },
+  {
+    title: "济南 · 青岛",
+    href: `${HERITAGE_PAGES_BASE}/jinan-qingdao.html`,
     note: "地球目的地互链",
   },
   {
