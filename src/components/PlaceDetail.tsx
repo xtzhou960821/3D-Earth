@@ -13,7 +13,7 @@ import {
   Camera,
   Images,
 } from "lucide-react";
-import type { CheckIn, Place } from "../types";
+import type { CheckIn, Layer, Place } from "../types";
 import { hotels } from "../data/hotels";
 import { publicUrl } from "../lib/publicUrl";
 import { getHeritageAlbumUrl, getRelatedHeritageAlbums } from "../data/heritageAlbums";
@@ -31,6 +31,8 @@ export default function PlaceDetail({
   onFly,
   onImport,
   importEnabled = true,
+  nearbyPanoramas = [],
+  onOpenPanorama,
 }: {
   place: Place;
   favorite: boolean;
@@ -42,6 +44,10 @@ export default function PlaceDetail({
   onImport: () => void;
   /** False on static Pages (no Express upload API). */
   importEnabled?: boolean;
+  /** Panorama layers within 20 km of this place. */
+  nearbyPanoramas?: Layer[];
+  /** Open an existing panorama viewer for a nearby layer. */
+  onOpenPanorama?: (layer: Layer) => void;
 }) {
   const [tab, setTab] = useState<"intro" | "nearby">("intro");
   const [showAlbum, setShowAlbum] = useState(false);
@@ -264,6 +270,22 @@ export default function PlaceDetail({
                 <small>资料核对：{place.verified} · 非实时营业状态</small>
               )}
             </section>
+            {nearbyPanoramas.map((layer) => (
+              <button
+                key={layer.id}
+                className="panorama-link"
+                onClick={() => onOpenPanorama?.(layer)}
+              >
+                <span className="round-icon">
+                  <Camera size={20} />
+                </span>
+                <span>
+                  <strong>打开720全景</strong>
+                  <small>{layer.name}</small>
+                </span>
+                <ArrowUpRight size={18} />
+              </button>
+            ))}
             <button
               className="panorama-link"
               onClick={onImport}
@@ -345,7 +367,7 @@ export default function PlaceDetail({
               </a>
             ))}
             <p className="nearby-note">
-              酒店资料核对：2026-09-05。美食链接为地图搜索；当前不提供实时房价、评分或房态。
+              各条酒店资料以对应官网为准。美食链接为地图搜索；当前不提供实时房价、评分或房态。
             </p>
           </div>
         )}

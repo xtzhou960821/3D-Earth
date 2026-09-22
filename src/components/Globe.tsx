@@ -22,6 +22,8 @@ import { getPanoramaPresentation } from "../lib/layerView";
 interface Props {
   selected: Place | null;
   visibleIds: string[];
+  /** Ordered stops of the open journey. Two or more draw a route line. */
+  routeStops: Place[];
   layers: Layer[];
   onSelect: (p: Place) => void;
   onPanorama: (l: Layer) => void;
@@ -149,6 +151,34 @@ export const Globe = forwardRef<MapHandle, Props>(function Globe(props, ref) {
     });
   }
 
+  /**
+   * Fly so every stop of a route is in frame.
+   * @param stops Places in visit order
+   */
+  function flyToPlaces(stops: Place[]) {
+    if (stops.length <= 1) {
+      if (stops[0]) flyTo(stops[0]);
+      return;
+    }
+    const lons = stops.map((stop) => stop.lon);
+    const lats = stops.map((stop) => stop.lat);
+    const west = Math.min(...lons);
+    const east = Math.max(...lons);
+    const south = Math.min(...lats);
+    const north = Math.max(...lats);
+    const padLon = Math.max(0.45, (east - west) * 0.35);
+    const padLat = Math.max(0.35, (north - south) * 0.45);
+    viewer.current?.camera.flyTo({
+      destination: C.Rectangle.fromDegrees(
+        west - padLon,
+        south - padLat,
+        east + padLon,
+        north + padLat,
+      ),
+      duration: 1.8,
+    });
+  }
+
   function home() {
     viewer.current?.camera.flyTo({
       destination: C.Cartesian3.fromDegrees(105, 32, 9500000),
@@ -206,6 +236,7 @@ export const Globe = forwardRef<MapHandle, Props>(function Globe(props, ref) {
 
   useImperativeHandle(ref, () => ({
     flyTo,
+    flyToPlaces,
     home,
     zoom(direction) {
       const v = viewer.current;
@@ -544,6 +575,28 @@ export const Globe = forwardRef<MapHandle, Props>(function Globe(props, ref) {
     }
     request();
   }, [ready, props.visibleIds, props.labels, props.selected]);
+
+  useEffect(() => {
+    if (!ready || !viewer.current) return;
+    const id = "journey-route";
+    const previous = viewer.current.entities.getById(id);
+    if (previous) viewer.current.entities.remove(previous);
+    const stops = props.routeStops;
+    if (stops.length >= 2) {
+      viewer.current.entities.add({
+        id,
+        polyline: {
+          positions: C.Cartesian3.fromDegreesArrayHeights(
+            stops.flatMap((stop) => [stop.lon, stop.lat, stop.altitude + 400]),
+          ),
+          width: 3,
+          material: C.Color.fromCssColorString("#c9a46a"),
+          arcType: C.ArcType.GEODESIC,
+        },
+      });
+    }
+    request();
+  }, [ready, props.routeStops]);
 
   useEffect(() => {
     if (viewer.current)

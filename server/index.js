@@ -196,9 +196,13 @@ app.use(
   }),
 );
 if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(root, "dist")));
+  const dist = path.join(root, "dist");
+  app.use(express.static(dist));
+  app.get(["/heritage", "/heritage/"], (_req, res) =>
+    res.sendFile(path.join(dist, "heritage", "index.html")),
+  );
   app.get("/{*path}", (_req, res) =>
-    res.sendFile(path.join(root, "dist/index.html")),
+    res.sendFile(path.join(dist, "index.html")),
   );
 }
 app.use((err, _req, res, _next) =>

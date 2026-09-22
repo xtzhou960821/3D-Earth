@@ -32,9 +32,11 @@ import {
   Download,
   FileUp,
   Link2,
+  Route,
 } from "lucide-react";
 import { Globe } from "./components/Globe";
 import PlaceDetail from "./components/PlaceDetail";
+import JourneyList from "./components/JourneyList";
 import LayersPanel from "./components/LayersPanel";
 import PropertiesPanel from "./components/PropertiesPanel";
 import Modal from "./components/Modal";
@@ -48,6 +50,8 @@ import {
   type TravelRecordsDoc,
 } from "./lib/travelRecords";
 import { getDemoLayers } from "./lib/demoLayers";
+import { journeyStops, journeys } from "./data/journeys.ts";
+import { panoramasNearPlace } from "./lib/nearbyPanorama";
 import {
   buildShareUrl,
   readShareViewFromLocation,
@@ -61,7 +65,10 @@ export default function App() {
   const importRecordsRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState(""),
     [category, setCategory] = useState<Category | "全部">("全部"),
-    [tab, setTab] = useState<"explore" | "favorites" | "checkins">("explore"),
+    [tab, setTab] = useState<
+      "explore" | "favorites" | "checkins" | "journeys"
+    >("explore"),
+    [journeyId, setJourneyId] = useState<string | null>(null),
     [selected, setSelected] = useState<Place | null>(null),
     [favorites, setFavorites] = useState<string[]>(() => {
       const d = readStorage<unknown>("shanhai-favorites", []);
@@ -139,15 +146,23 @@ export default function App() {
    */
   useEffect(() => {
     if (shareReady) return;
-    const view = readShareViewFromLocation();
-    if (!view) {
+    const shared = readShareViewFromLocation();
+    if (!shared) {
       setShareReady(true);
       return;
     }
     if (status === "正在载入地球…") return;
-    map.current?.setCameraView(view, 0);
+    const place = shared.placeId
+      ? places.find((item) => item.id === shared.placeId)
+      : undefined;
+    if (place) {
+      setSelected(place);
+      setShowLayers(false);
+      setTab("explore");
+    }
+    map.current?.setCameraView(shared.view, 0);
     setShareReady(true);
-    notify("已打开分享视角");
+    notify(place ? `已打开分享视角 · ${place.name}` : "已打开分享视角");
   }, [shareReady, notify, status]);
   /**
    * Copy a Pages-friendly camera deep link to the clipboard.
@@ -158,7 +173,7 @@ export default function App() {
       notify("地图尚未就绪");
       return;
     }
-    const url = buildShareUrl(view);
+    const url = buildShareUrl(view, window.location, selected?.id);
     try {
       await navigator.clipboard.writeText(url);
       notify("分享链接已复制");
@@ -197,11 +212,46 @@ export default function App() {
       ),
     [category, query, tab, favorites, checkins],
   );
-  const visibleIds = useMemo(() => filtered.map((p) => p.id), [filtered]);
+  const activeJourney = journeys.find((journey) => journey.id === journeyId);
+  const routeStops = useMemo(
+    () => (tab === "journeys" && activeJourney ? journeyStops(activeJourney) : []),
+    [tab, activeJourney],
+  );
+  const visibleIds = useMemo(() => {
+    if (tab !== "journeys") return filtered.map((place) => place.id);
+    if (routeStops.length) return routeStops.map((place) => place.id);
+    return [
+      ...new Set(journeys.flatMap((journey) => [...journey.placeIds])),
+    ];
+  }, [tab, filtered, routeStops]);
+  const shownJourneys = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return journeys;
+    return journeys.filter((journey) => {
+      const names = journeyStops(journey)
+        .map((place) => `${place.name} ${place.region}`)
+        .join(" ");
+      return `${journey.title} ${journey.period} ${journey.summary} ${names}`
+        .toLowerCase()
+        .includes(q);
+    });
+  }, [query]);
   function select(p: Place) {
     setSelected(p);
     setShowLayers(false);
     map.current?.flyTo(p);
+  }
+  /**
+   * Focus one published route: frame its stops and draw the line.
+   * @param journey Route from the heritage catalog
+   */
+  function openJourney(journey: (typeof journeys)[number]) {
+    setJourneyId(journey.id);
+    setSelected(null);
+    setShowLayers(false);
+    setTab("journeys");
+    map.current?.flyToPlaces(journeyStops(journey));
+    setMobileOpen(false);
   }
   function openCheck(p: Place) {
     setCheckPlace(p);
@@ -319,6 +369,7 @@ export default function App() {
                 e.preventDefault();
                 setSelected(null);
                 setShowLayers(false);
+                setJourneyId(null);
                 map.current?.home();
               }}
             >
@@ -362,6 +413,7 @@ export default function App() {
           {(
             [
               { id: "explore", label: "探索", icon: Compass },
+              { id: "journeys", label: "旅程", icon: Route },
               { id: "favorites", label: "收藏", icon: Heart },
               { id: "checkins", label: "打卡", icon: MapPin },
             ] as const
@@ -373,6 +425,7 @@ export default function App() {
                 setTab(id);
                 setSelected(null);
                 setShowLayers(false);
+                if (id !== "journeys") setJourneyId(null);
               }}
             >
               <Icon size={18} />
@@ -414,6 +467,18 @@ export default function App() {
               }}
               onImport={openImport}
               importEnabled={apiAvailable}
+              nearbyPanoramas={panoramasNearPlace(selected, layers)}
+              onOpenPanorama={(layer) => {
+                setPanorama(layer);
+                setMobileOpen(false);
+              }}
+            />
+          ) : tab === "journeys" ? (
+            <JourneyList
+              journeys={shownJourneys}
+              activeId={journeyId}
+              onOpen={openJourney}
+              onSelectStop={select}
             />
           ) : (
             <div className="destinations">
@@ -560,6 +625,7 @@ export default function App() {
           ref={map}
           selected={selected}
           visibleIds={visibleIds}
+          routeStops={routeStops}
           layers={layers}
           onSelect={select}
           onPanorama={setPanorama}

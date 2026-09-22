@@ -1,6 +1,26 @@
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import { viteStaticCopy } from "vite-plugin-static-copy";
+
+/**
+ * Serve `public/heritage/index.html` for `/heritage` and `/heritage/`.
+ * Vite's SPA fallback otherwise returns the globe app for the directory URL.
+ */
+function heritageIndex(): Plugin {
+  return {
+    name: "heritage-index",
+    configureServer(server) {
+      server.middlewares.use((req, _res, next) => {
+        const path = req.url?.split("?")[0];
+        if (path === "/heritage" || path === "/heritage/") {
+          const query = req.url?.includes("?") ? `?${req.url.split("?")[1]}` : "";
+          req.url = `/heritage/index.html${query}`;
+        }
+        next();
+      });
+    },
+  };
+}
 
 /**
  * Site base path. Local Express/Vite use `/`.
@@ -12,6 +32,7 @@ const cesiumBase = `${base.endsWith("/") ? base : `${base}/`}cesium`;
 export default defineConfig({
   base,
   plugins: [
+    heritageIndex(),
     react(),
     viteStaticCopy({
       targets: [

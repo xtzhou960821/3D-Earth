@@ -3,7 +3,10 @@ export interface HotelReference {
   area: string;
   source: string;
 }
-// Curated references, checked 2026-09-05. These are not live availability or rankings.
+/**
+ * Public hotel pages for reference.
+ * Each source URL is the authority for that stay; this is not one shared audit date, and not live rates.
+ */
 export const hotels: Record<string, HotelReference> = {
   jiuzhai: {
     name: "九寨绿发希尔顿度假酒店",

@@ -4,36 +4,13 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-/**
- * Mirror of src/lib/shareView encode/parse contract (kept in sync for Node tests).
- * @param {string} raw
- */
-function parseCameraView(raw) {
-  if (!raw) return null;
-  let text = String(raw).trim();
-  if (text.startsWith("#")) text = text.slice(1);
-  const fromQuery = text.match(/(?:^|&)v=([^&]+)/);
-  if (!text.startsWith("v=") && fromQuery) text = `v=${fromQuery[1]}`;
-  const match =
-    /^v=(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)$/.exec(
-      text,
-    );
-  if (!match) return null;
-  const values = match.slice(1).map(Number);
-  const [lon, lat, height, heading, pitch, roll] = values;
-  if (values.some((n) => !Number.isFinite(n))) return null;
-  if (lon < -180 || lon > 180 || lat < -90 || lat > 90) return null;
-  if (height < -1000 || height > 5e7) return null;
-  return { longitude: lon, latitude: lat, height, heading, pitch, roll };
-}
-
-/**
- * @param {{ longitude: number, latitude: number, height: number, heading: number, pitch: number, roll: number }} view
- */
-function encodeCameraView(view) {
-  const fmt = (n, digits) => Number(n.toFixed(digits)).toString();
-  return `v=${fmt(view.longitude, 6)},${fmt(view.latitude, 6)},${fmt(view.height, 1)},${fmt(view.heading, 2)},${fmt(view.pitch, 2)},${fmt(view.roll, 2)}`;
-}
+import {
+  buildShareUrl,
+  encodeCameraView,
+  encodeShareLink,
+  parseCameraView,
+  parseShareLink,
+} from "../src/lib/shareView.ts";
 
 describe("shareView contract", () => {
   it("round-trips encode/parse", () => {
@@ -49,6 +26,10 @@ describe("shareView contract", () => {
     assert.match(encoded, /^v=/);
     const parsed = parseCameraView(`#${encoded}`);
     assert.deepEqual(parsed, view);
+    const withPlace = encodeShareLink(view, "qingdao");
+    assert.equal(parseShareLink(`#${withPlace}`)?.placeId, "qingdao");
+    assert.deepEqual(parseShareLink(`#${withPlace}`)?.view, view);
+    assert.equal(parseCameraView(`#${withPlace}`)?.longitude, view.longitude);
   });
 
   it("rejects out-of-range coordinates", () => {
@@ -66,11 +47,26 @@ describe("shareView contract", () => {
       pitch: -45,
       roll: 0,
     });
-    const url = `https://xtzhou960821.github.io/3D-Earth/#${hash}`;
+    const url = buildShareUrl(
+      {
+        longitude: 104.06,
+        latitude: 30.67,
+        height: 500,
+        heading: 0,
+        pitch: -45,
+        roll: 0,
+      },
+      {
+        origin: "https://xtzhou960821.github.io",
+        pathname: "/3D-Earth/",
+        search: "",
+      },
+    );
     assert.equal(
       url,
       "https://xtzhou960821.github.io/3D-Earth/#v=104.06,30.67,500,0,-45,0",
     );
+    assert.match(hash, /^v=104\.06,30\.67,500,0,-45,0$/);
   });
 });
 

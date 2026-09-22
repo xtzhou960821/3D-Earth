@@ -55,6 +55,8 @@ export interface CameraView {
 }
 export interface MapHandle {
   flyTo: (place: Place) => void;
+  /** Frame every stop of a route. A single stop uses the same flight as `flyTo`. */
+  flyToPlaces: (places: Place[]) => void;
   home: () => void;
   zoom: (direction: number) => void;
   tilt: () => void;
