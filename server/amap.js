@@ -75,6 +75,23 @@ export function wgs84ToGcj02(lon, lat) {
 }
 
 /**
+ * GCJ-02 转回 WGS84。用正向公式迭代，避免再把已是火星坐标的点转偏。
+ * @param {number} lon
+ * @param {number} lat
+ */
+export function gcj02ToWgs84(lon, lat) {
+  if (outsideChina(lon, lat)) return { longitude: lon, latitude: lat };
+  let longitude = lon;
+  let latitude = lat;
+  for (let i = 0; i < 8; i += 1) {
+    const gcj = wgs84ToGcj02(longitude, latitude);
+    longitude -= gcj.longitude - lon;
+    latitude -= gcj.latitude - lat;
+  }
+  return { longitude, latitude };
+}
+
+/**
  * @param {unknown} value
  */
 function text(value, max) {
@@ -201,4 +218,52 @@ export async function fetchPlaceContext({ key, longitude, latitude, fetchImpl = 
     dining,
     lodging,
   };
+}
+
+/**
+ * 把高德折线压成地球用的 WGS84 点，避免一次返回上千个顶点。
+ * @param {string} polyline
+ * @param {number} maxPoints
+ */
+export function decodeDrivingPolyline(polyline, maxPoints = 240) {
+  const raw = String(polyline || "")
+    .split(";")
+    .map((pair) => pair.split(",").map(Number))
+    .filter(([lon, lat]) => Number.isFinite(lon) && Number.isFinite(lat))
+    .map(([lon, lat]) => gcj02ToWgs84(lon, lat));
+  if (raw.length <= maxPoints) return raw;
+  const step = (raw.length - 1) / (maxPoints - 1);
+  const sampled = [];
+  for (let i = 0; i < maxPoints; i += 1) sampled.push(raw[Math.round(i * step)]);
+  return sampled;
+}
+
+/**
+ * 按途经点请求驾车路线。坐标必须是 WGS84。失败时返回 configured 但 path 为空，由前端改用测地线。
+ * @param {{
+ *   key?: string,
+ *   stops: { longitude: number, latitude: number }[],
+ *   fetchImpl?: typeof fetch,
+ * }} input
+ */
+export async function fetchDrivingRoute({ key, stops, fetchImpl = fetch }) {
+  if (!key?.trim() || stops.length < 2) return { configured: Boolean(key?.trim()), path: [] };
+  const gcj = stops.map((stop) => wgs84ToGcj02(stop.longitude, stop.latitude));
+  const origin = gcj[0];
+  const destination = gcj[gcj.length - 1];
+  const waypoints = gcj
+    .slice(1, -1)
+    .map((stop) => `${stop.longitude.toFixed(6)},${stop.latitude.toFixed(6)}`)
+    .join(";");
+  const params = {
+    key,
+    origin: `${origin.longitude.toFixed(6)},${origin.latitude.toFixed(6)}`,
+    destination: `${destination.longitude.toFixed(6)},${destination.latitude.toFixed(6)}`,
+    extensions: "base",
+  };
+  if (waypoints) params.waypoints = waypoints;
+  const data = await amapGet(fetchImpl, "/v3/direction/driving", params);
+  const steps = data.route?.paths?.[0]?.steps;
+  const polyline = Array.isArray(steps) ? steps.map((step) => step.polyline || "").join(";") : "";
+  return { configured: true, path: decodeDrivingPolyline(polyline) };
 }

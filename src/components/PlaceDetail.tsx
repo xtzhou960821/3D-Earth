@@ -336,8 +336,10 @@ export default function PlaceDetail({
               <a href={place.source} target="_blank" rel="noreferrer">
                 查看官方信息 <ArrowUpRight size={14} />
               </a>
-              {place.verified && (
+              {place.verified ? (
                 <small>资料核对：{place.verified} · 非实时营业状态</small>
+              ) : (
+                <small>尚未逐条核对开放时间，以官方当日公告为准。</small>
               )}
             </section>
             {nearbyPanoramas.map((layer) => (

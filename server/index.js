@@ -5,7 +5,7 @@ import path from "node:path";
 import fs from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import { safeRelativePath, validateLayer } from "./validation.js";
-import { fetchPlaceContext, inRange } from "./amap.js";
+import { fetchDrivingRoute, fetchPlaceContext, inRange } from "./amap.js";
 const app = express();
 const root = path.resolve(import.meta.dirname, "..");
 const dataRoot = path.join(root, "data");
@@ -73,6 +73,36 @@ app.get("/api/place-context", async (req, res) => {
     res.json(value);
   } catch {
     res.status(502).json({ error: "高德服务暂时不可用" });
+  }
+});
+/** 旅程沿路折线缓存。Pages 无此接口时前端改用测地线。 */
+const routeCache = new Map();
+app.get("/api/journey-route", async (req, res) => {
+  const stops = String(req.query.stops || "")
+    .split(";")
+    .map((pair) => pair.split(",").map(Number))
+    .filter((pair) => pair.length === 2);
+  if (stops.length < 2 || stops.length > 16) {
+    return res.status(400).json({ error: "途经点数量无效" });
+  }
+  if (stops.some(([lon, lat]) => !inRange(lon, -180, 180) || !inRange(lat, -90, 90))) {
+    return res.status(400).json({ error: "经纬度无效" });
+  }
+  const key = process.env.AMAP_WEB_KEY || "";
+  if (!key.trim()) return res.json({ configured: false, path: [] });
+  const cacheKey = stops.map(([lon, lat]) => `${lon.toFixed(3)},${lat.toFixed(3)}`).join(";");
+  const hit = routeCache.get(cacheKey);
+  if (hit && hit.expires > Date.now()) return res.json(hit.value);
+  try {
+    const value = await fetchDrivingRoute({
+      key,
+      stops: stops.map(([longitude, latitude]) => ({ longitude, latitude })),
+    });
+    routeCache.set(cacheKey, { expires: Date.now() + 30 * 60 * 1000, value });
+    res.setHeader("Cache-Control", "private, max-age=300");
+    res.json(value);
+  } catch {
+    res.status(502).json({ error: "驾车路线暂时不可用" });
   }
 });
 app.get("/api/config", (_req, res) => {

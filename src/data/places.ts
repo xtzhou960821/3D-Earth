@@ -1,4 +1,8 @@
 import type { Place } from "../types";
+/**
+ * 目录坐标一律为 WGS84。来自高德的点先转回 WGS84 再写入，避免查询时二次偏移。
+ * `verified` 只在对照过官方页面后填写，没有核对日期的条目不要补一个假日期。
+ */
 const pending = "开放时间随季节调整，请查看景区当日公告";
 export const places: Place[] = [
   {
@@ -413,8 +417,8 @@ export const places: Place[] = [
     en: "JINAN",
     region: "山东 · 济南",
     category: "城市漫游",
-    lon: 116.974,
-    lat: 36.614,
+    lon: 116.967883,
+    lat: 36.613726,
     altitude: 50,
     distance: 3500,
     description:
@@ -434,8 +438,8 @@ export const places: Place[] = [
     en: "QINGDAO",
     region: "山东 · 青岛",
     category: "城市漫游",
-    lon: 120.398,
-    lat: 36.055,
+    lon: 120.39317,
+    lat: 36.054304,
     altitude: 15,
     distance: 4000,
     description:

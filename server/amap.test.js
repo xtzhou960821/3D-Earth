@@ -1,6 +1,13 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { cityName, fetchPlaceContext, shapePoi, wgs84ToGcj02 } from "./amap.js";
+import {
+  cityName,
+  decodeDrivingPolyline,
+  fetchPlaceContext,
+  gcj02ToWgs84,
+  shapePoi,
+  wgs84ToGcj02,
+} from "./amap.js";
 
 describe("wgs84 to gcj02", () => {
   it("shifts a mainland point and leaves overseas points unchanged", () => {
@@ -9,6 +16,23 @@ describe("wgs84 to gcj02", () => {
     assert.ok(Math.abs(beijing.latitude - 39.9075) > 0.001);
     assert.ok(Math.abs(beijing.longitude - 116.3913) < 0.02);
     assert.deepEqual(wgs84ToGcj02(-0.12, 51.5), { longitude: -0.12, latitude: 51.5 });
+  });
+
+  it("inverts a GCJ-02 point back to WGS84", () => {
+    const gcj = { longitude: 116.973585, latitude: 36.613864 };
+    const wgs = gcj02ToWgs84(gcj.longitude, gcj.latitude);
+    const back = wgs84ToGcj02(wgs.longitude, wgs.latitude);
+    assert.ok(Math.abs(back.longitude - gcj.longitude) < 0.00001);
+    assert.ok(Math.abs(back.latitude - gcj.latitude) < 0.00001);
+  });
+});
+
+describe("driving polyline", () => {
+  it("turns GCJ-02 vertices into WGS84 and keeps both ends", () => {
+    const path = decodeDrivingPolyline("116.973585,36.613864;120.398303,36.054584", 10);
+    assert.equal(path.length, 2);
+    assert.ok(path[0].longitude < 116.973585);
+    assert.ok(path[1].longitude < 120.398303);
   });
 });
 

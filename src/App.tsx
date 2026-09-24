@@ -217,6 +217,9 @@ export default function App() {
     () => (tab === "journeys" && activeJourney ? journeyStops(activeJourney) : []),
     [tab, activeJourney],
   );
+  const [routePath, setRoutePath] = useState<
+    { longitude: number; latitude: number }[]
+  >([]);
   const visibleIds = useMemo(() => {
     if (tab !== "journeys") return filtered.map((place) => place.id);
     if (routeStops.length) return routeStops.map((place) => place.id);
@@ -236,6 +239,26 @@ export default function App() {
         .includes(q);
     });
   }, [query]);
+  useEffect(() => {
+    if (!apiAvailable || routeStops.length < 2) {
+      setRoutePath([]);
+      return;
+    }
+    let cancel = false;
+    const stops = routeStops.map((place) => `${place.lon},${place.lat}`).join(";");
+    api<{ path?: { longitude: number; latitude: number }[] }>(
+      `/journey-route?stops=${encodeURIComponent(stops)}`,
+    )
+      .then((data) => {
+        if (!cancel) setRoutePath(data.path?.length ? data.path : []);
+      })
+      .catch(() => {
+        if (!cancel) setRoutePath([]);
+      });
+    return () => {
+      cancel = true;
+    };
+  }, [apiAvailable, routeStops]);
   function select(p: Place) {
     setSelected(p);
     setShowLayers(false);
@@ -626,6 +649,7 @@ export default function App() {
           selected={selected}
           visibleIds={visibleIds}
           routeStops={routeStops}
+          routePath={routePath}
           layers={layers}
           onSelect={select}
           onPanorama={setPanorama}

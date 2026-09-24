@@ -136,9 +136,9 @@ export default function LayersPanel({
       </button>
       {!importEnabled && (
         <p className="import-disabled-tip">
-          完整导入能力请本机 npm start
-          {layers.some((l) => l.readOnly)
-            ? " · 下方为 Pages 只读示例图层"
+          完整导入能力请本机 npm start。
+          {layers.some((l) => l.kind === "panorama")
+            ? " 下面的720全景是站点自带的压缩片，清晰度低于本机原片。"
             : ""}
         </p>
       )}

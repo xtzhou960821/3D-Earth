@@ -24,6 +24,8 @@ interface Props {
   visibleIds: string[];
   /** Ordered stops of the open journey. Two or more draw a route line. */
   routeStops: Place[];
+  /** WGS84 driving path. When empty, the line falls back to a geodesic. */
+  routePath?: { longitude: number; latitude: number }[];
   layers: Layer[];
   onSelect: (p: Place) => void;
   onPanorama: (l: Layer) => void;
@@ -582,13 +584,16 @@ export const Globe = forwardRef<MapHandle, Props>(function Globe(props, ref) {
     const previous = viewer.current.entities.getById(id);
     if (previous) viewer.current.entities.remove(previous);
     const stops = props.routeStops;
-    if (stops.length >= 2) {
+    const road = props.routePath ?? [];
+    const positions =
+      road.length >= 2
+        ? road.flatMap((point) => [point.longitude, point.latitude, 400])
+        : stops.flatMap((stop) => [stop.lon, stop.lat, stop.altitude + 400]);
+    if (positions.length >= 6) {
       viewer.current.entities.add({
         id,
         polyline: {
-          positions: C.Cartesian3.fromDegreesArrayHeights(
-            stops.flatMap((stop) => [stop.lon, stop.lat, stop.altitude + 400]),
-          ),
+          positions: C.Cartesian3.fromDegreesArrayHeights(positions),
           width: 3,
           material: C.Color.fromCssColorString("#c9a46a"),
           arcType: C.ArcType.GEODESIC,
@@ -596,7 +601,7 @@ export const Globe = forwardRef<MapHandle, Props>(function Globe(props, ref) {
       });
     }
     request();
-  }, [ready, props.routeStops]);
+  }, [ready, props.routeStops, props.routePath]);
 
   useEffect(() => {
     if (viewer.current)
