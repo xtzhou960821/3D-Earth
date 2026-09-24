@@ -84,21 +84,17 @@ describe("bimPick contract", () => {
   });
 });
 
-describe("demo tiles packaging", () => {
-  it("examples/tiles sample exists for Pages copy", () => {
+describe("built-in panoramas", () => {
+  it("ships two panoramas and does not mount the Chengdu sample tiles", () => {
     const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-    assert.ok(
-      fs.existsSync(path.join(root, "examples/tiles/tileset.json")),
-      "examples/tiles/tileset.json",
-    );
-    assert.ok(
-      fs.existsSync(path.join(root, "examples/tiles/building.b3dm")),
-      "examples/tiles/building.b3dm",
-    );
+    const source = fs.readFileSync(path.join(root, "src/lib/demoLayers.ts"), "utf8");
+    assert.match(source, /椒江大桥公园720全景/);
+    assert.match(source, /仙居桐江书院720全景/);
+    assert.doesNotMatch(source, /示例/);
+    assert.doesNotMatch(source, /成都 3D Tiles/);
+    assert.doesNotMatch(source, /readOnly:\s*true/);
     const vite = fs.readFileSync(path.join(root, "vite.config.ts"), "utf8");
-    assert.match(vite, /demo-tiles/);
-    assert.match(vite, /examples\/tiles/);
-    assert.match(vite, /stripBase:\s*2/);
+    assert.doesNotMatch(vite, /demo-tiles/);
   });
 });
 

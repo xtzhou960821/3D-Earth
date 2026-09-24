@@ -16,7 +16,52 @@ import {
 import type { CheckIn, Layer, Place } from "../types";
 import { hotels } from "../data/hotels";
 import { publicUrl } from "../lib/publicUrl";
+import { api } from "../lib/api";
 import { getHeritageAlbumUrl, getRelatedHeritageAlbums } from "../data/heritageAlbums";
+
+/** 高德返回的附近商户，不含评分和价格。 */
+interface LivePoi {
+  name: string;
+  address: string;
+  distance: number | null;
+  longitude: number | null;
+  latitude: number | null;
+}
+
+/** 城市预报与 1.5 公里内餐饮、酒店名录。 */
+interface PlaceContext {
+  configured: boolean;
+  city?: string;
+  weather?: {
+    date: string;
+    dayweather: string;
+    nightweather: string;
+    daytemp: string;
+    nighttemp: string;
+  } | null;
+  dining?: LivePoi[];
+  lodging?: LivePoi[];
+}
+
+/**
+ * 打开高德标注。坐标已是 GCJ-02。
+ * @param poi 商户
+ */
+function amapMarker(poi: LivePoi) {
+  if (poi.longitude == null || poi.latitude == null) {
+    return `https://uri.amap.com/search?keyword=${encodeURIComponent(poi.name)}&src=shanhai-earth&view=map`;
+  }
+  return `https://uri.amap.com/marker?position=${poi.longitude},${poi.latitude}&name=${encodeURIComponent(poi.name)}&src=shanhai-earth&coordinate=gaode&callnative=0`;
+}
+
+/**
+ * @param meters 距离（米）
+ */
+function formatDistance(meters: number | null) {
+  if (meters == null) return "";
+  if (meters >= 1000) return `${(meters / 1000).toFixed(1)} 公里`;
+  return `${meters} 米`;
+}
 
 /**
  * Destination detail panel: intro, nearby lodging, optional heritage album link/iframe.
@@ -50,6 +95,12 @@ export default function PlaceDetail({
   onOpenPanorama?: (layer: Layer) => void;
 }) {
   const [tab, setTab] = useState<"intro" | "nearby">("intro");
+  const [live, setLive] = useState<
+    | { status: "idle" }
+    | { status: "loading" }
+    | { status: "error" }
+    | { status: "ready"; data: PlaceContext }
+  >({ status: "idle" });
   const [showAlbum, setShowAlbum] = useState(false);
   /** `trying` loads iframe; `blocked` falls back to open-only card. */
   const [embedState, setEmbedState] = useState<"idle" | "trying" | "ok" | "blocked">(
@@ -63,7 +114,26 @@ export default function PlaceDetail({
   useEffect(() => {
     setShowAlbum(false);
     setEmbedState("idle");
+    setLive({ status: "idle" });
   }, [place.id]);
+
+  useEffect(() => {
+    if (tab !== "nearby" || !importEnabled) return;
+    let cancel = false;
+    setLive({ status: "loading" });
+    api<PlaceContext>(
+      `/place-context?lon=${encodeURIComponent(place.lon)}&lat=${encodeURIComponent(place.lat)}`,
+    )
+      .then((data) => {
+        if (!cancel) setLive({ status: "ready", data });
+      })
+      .catch(() => {
+        if (!cancel) setLive({ status: "error" });
+      });
+    return () => {
+      cancel = true;
+    };
+  }, [tab, place.id, place.lon, place.lat, importEnabled]);
 
   useEffect(() => {
     if (!showAlbum || embedState !== "trying") return;
@@ -313,6 +383,91 @@ export default function PlaceDetail({
             <p className="nearby-note">
               酒店资料供出行参考；价格、房态与距离请在酒店官网或地图中核实。
             </p>
+            {!importEnabled && (
+              <p className="nearby-note">实时天气与周边名录需本机 npm start。</p>
+            )}
+            {importEnabled && live.status === "loading" && (
+              <p className="nearby-note">正在查询城市预报与周边名录…</p>
+            )}
+            {importEnabled && live.status === "error" && (
+              <p className="nearby-note">
+                周边实时信息暂时无法获取，仍可使用下方搜索链接。
+              </p>
+            )}
+            {importEnabled && live.status === "ready" && !live.data.configured && (
+              <p className="nearby-note">
+                未配置高德 Web 服务 Key，仍可使用下方搜索链接。
+              </p>
+            )}
+            {importEnabled && live.status === "ready" && live.data.configured && (
+              <div className="nearby-live">
+                {live.data.weather && (
+                  <p className="nearby-note">
+                    {live.data.city || place.region}今日预报：白天
+                    {live.data.weather.dayweather} {live.data.weather.daytemp}°C，夜间
+                    {live.data.weather.nightweather} {live.data.weather.nighttemp}°C。
+                    这是城市预报，不是景区实时开放状态。
+                  </p>
+                )}
+                {(live.data.dining?.length ?? 0) > 0 && (
+                  <>
+                    <h3>
+                      <Utensils size={18} />
+                      附近餐饮
+                    </h3>
+                    {live.data.dining?.map((poi) => (
+                      <a
+                        className="nearby-row"
+                        key={`dining-${poi.name}-${poi.distance}`}
+                        href={amapMarker(poi)}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <span>
+                          <strong>{poi.name}</strong>
+                          <small>
+                            {[formatDistance(poi.distance), poi.address]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </small>
+                        </span>
+                        <ExternalLink size={15} />
+                      </a>
+                    ))}
+                  </>
+                )}
+                {(live.data.lodging?.length ?? 0) > 0 && (
+                  <>
+                    <h3>
+                      <BedDouble size={18} />
+                      附近酒店
+                    </h3>
+                    {live.data.lodging?.map((poi) => (
+                      <a
+                        className="nearby-row"
+                        key={`lodging-${poi.name}-${poi.distance}`}
+                        href={amapMarker(poi)}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <span>
+                          <strong>{poi.name}</strong>
+                          <small>
+                            {[formatDistance(poi.distance), poi.address]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </small>
+                        </span>
+                        <ExternalLink size={15} />
+                      </a>
+                    ))}
+                  </>
+                )}
+                <p className="nearby-note">
+                  名录来自高德，约 1.5 公里内。不含评分、价格或景区开放状态。
+                </p>
+              </div>
+            )}
             <h3>
               <BedDouble size={18} />
               住宿参考
@@ -367,7 +522,7 @@ export default function PlaceDetail({
               </a>
             ))}
             <p className="nearby-note">
-              各条酒店资料以对应官网为准。美食链接为地图搜索；当前不提供实时房价、评分或房态。
+              各条酒店资料以对应官网为准。上方名录与美食链接均不含实时房价、评分或房态。
             </p>
           </div>
         )}

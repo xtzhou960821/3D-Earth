@@ -5,6 +5,7 @@ import path from "node:path";
 import fs from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import { safeRelativePath, validateLayer } from "./validation.js";
+import { fetchPlaceContext, inRange } from "./amap.js";
 const app = express();
 const root = path.resolve(import.meta.dirname, "..");
 const dataRoot = path.join(root, "data");
@@ -42,8 +43,38 @@ app.use((req, res, next) => {
 });
 app.use(express.json({ limit: "1mb" }));
 app.get("/api/health", (_req, res) =>
-  res.json({ ok: true, ionConfigured: !!process.env.CESIUM_ION_TOKEN }),
+  res.json({
+    ok: true,
+    ionConfigured: !!process.env.CESIUM_ION_TOKEN,
+    amapConfigured: !!process.env.AMAP_WEB_KEY?.trim(),
+  }),
 );
+/** 同一坐标 10 分钟内复用，避免切换页签时重复请求高德。 */
+const placeContextCache = new Map();
+app.get("/api/place-context", async (req, res) => {
+  const longitude = Number(req.query.lon);
+  const latitude = Number(req.query.lat);
+  if (!inRange(longitude, -180, 180) || !inRange(latitude, -90, 90)) {
+    return res.status(400).json({ error: "经纬度无效" });
+  }
+  const key = process.env.AMAP_WEB_KEY || "";
+  if (!key.trim()) return res.json({ configured: false });
+  const cacheKey = `${longitude.toFixed(2)},${latitude.toFixed(2)}`;
+  const hit = placeContextCache.get(cacheKey);
+  if (hit && hit.expires > Date.now()) return res.json(hit.value);
+  try {
+    const value = await fetchPlaceContext({ key, longitude, latitude });
+    placeContextCache.set(cacheKey, { expires: Date.now() + 10 * 60 * 1000, value });
+    if (placeContextCache.size > 40) {
+      const oldest = placeContextCache.keys().next().value;
+      if (oldest) placeContextCache.delete(oldest);
+    }
+    res.setHeader("Cache-Control", "private, max-age=300");
+    res.json(value);
+  } catch {
+    res.status(502).json({ error: "高德服务暂时不可用" });
+  }
+});
 app.get("/api/config", (_req, res) => {
   res.setHeader("Cache-Control", "no-store");
   res.json({ ionToken: process.env.CESIUM_ION_TOKEN || "" });

@@ -46,12 +46,6 @@ export default defineConfig({
           dest: "wasm",
           rename: { stripBase: true },
         },
-        // Chengdu sample tiles for GitHub Pages (no Express upload).
-        {
-          src: "examples/tiles/*",
-          dest: "demo-tiles",
-          rename: { stripBase: 2 },
-        },
       ],
     }),
   ],

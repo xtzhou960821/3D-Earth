@@ -1074,6 +1074,9 @@ small {
 .nearby-row > svg {
   color: #8fabae;
 }
+.nearby-live {
+  margin-top: 8px;
+}
 .nearby > .nearby-note:last-child {
   margin-top: 20px;
   font-size: 10px;
