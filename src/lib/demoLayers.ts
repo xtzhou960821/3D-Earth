@@ -10,7 +10,7 @@ export const DEMO_PANO_TONGJIANG_ID = "demo-pano-tongjiang-academy";
 /**
  * Built-in panoramas for static hosts (GitHub Pages) without Express upload.
  * Files live under `public/demo-panoramas/` (compressed). Full-resolution
- * originals stay in gitignored `720全景/`.
+ * originals are tracked in `720全景/`.
  * @returns Built-in panorama layers
  */
 export function getDemoLayers(): Layer[] {
