@@ -137,7 +137,7 @@ export default function App() {
       })
       .catch(() => {
         setApiAvailable(false);
-        // Static Pages: seed the two built-in panoramas (no Express upload).
+        // Static Pages: seed the built-in panoramas (no Express upload).
         setLayers(getDemoLayers());
       });
   }, []);

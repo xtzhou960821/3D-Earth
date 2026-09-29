@@ -7,10 +7,14 @@ export const DEMO_PANO_JIAOJIANG_ID = "demo-pano-jiaojiang-bridge-park";
 /** Stable id: Tongjiang Academy panorama. */
 export const DEMO_PANO_TONGJIANG_ID = "demo-pano-tongjiang-academy";
 
+/** Stable id: Linhai Bridge panorama. */
+export const DEMO_PANO_LINHAI_ID = "demo-pano-linhai-bridge";
+
 /**
  * Built-in panoramas for static hosts (GitHub Pages) without Express upload.
  * Files live under `public/demo-panoramas/` (compressed). Full-resolution
- * originals are tracked in `720全景/`.
+ * originals are tracked in `720全景/` (Jiaojiang / Tongjiang) or stay local
+ * in `data/uploads/` (Linhai Bridge, uploaded 2026-09-29).
  * @returns Built-in panorama layers
  */
 export function getDemoLayers(): Layer[] {
@@ -43,6 +47,21 @@ export function getDemoLayers(): Layer[] {
       visible: true,
       createdAt: "2026-09-12T11:20:03.223Z",
       bytes: 2453279,
+      sourceFormat: "JPG",
+    },
+    {
+      id: DEMO_PANO_LINHAI_ID,
+      name: "临海大桥720全景",
+      kind: "panorama",
+      longitude: 121.134163,
+      latitude: 28.834014,
+      height: 137.2,
+      heading: 0,
+      scale: 1,
+      url: publicUrl("demo-panoramas/linhai-bridge-720.jpg"),
+      visible: true,
+      createdAt: "2026-09-29T11:12:43.171Z",
+      bytes: 2276986,
       sourceFormat: "JPG",
     },
   ];

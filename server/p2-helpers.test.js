@@ -85,11 +85,12 @@ describe("bimPick contract", () => {
 });
 
 describe("built-in panoramas", () => {
-  it("ships two panoramas and does not mount the Chengdu sample tiles", () => {
+  it("ships three panoramas and does not mount the Chengdu sample tiles", () => {
     const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
     const source = fs.readFileSync(path.join(root, "src/lib/demoLayers.ts"), "utf8");
     assert.match(source, /椒江大桥公园720全景/);
     assert.match(source, /仙居桐江书院720全景/);
+    assert.match(source, /临海大桥720全景/);
     assert.doesNotMatch(source, /示例/);
     assert.doesNotMatch(source, /成都 3D Tiles/);
     assert.doesNotMatch(source, /readOnly:\s*true/);

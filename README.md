@@ -62,7 +62,7 @@ Cesium ion 令牌配置在 `.env`（该文件被版本控制忽略）。新机�
 | --- | --- | --- |
 | 三维地球浏览 / 目的地 / 相册深链 | ✅ | ✅（相册内容在 xixia 公开 Pages） |
 | 收藏 / 打卡 / 旅行记录导入导出 | ✅（当前浏览器 localStorage） | ✅（当前浏览器 localStorage） |
-| `/api/layers` 上传、持久化、删除 | ✅ Express | ❌ 无后端；灰显导入；自动挂载两张压缩全景（椒江大桥公园 / 仙居桐江书院） |
+| `/api/layers` 上传、持久化、删除 | ✅ Express | ❌ 无后端；灰显导入；自动挂载三张压缩全景（椒江大桥公园 / 仙居桐江书院 / 临海大桥） |
 | 分享视角深链 `#v=…` | ✅ | ✅（hash，无后端） |
 | BIM 点击属性面板 | ✅（有元数据时） | ✅（无 batch/extras 时为空状态） |
 | Cesium ion 令牌 | `.env` → `/api/config` | Secret `VITE_CESIUM_ION_TOKEN`（写入前端包；请用受限客户端令牌；**未配置时静默基础地球**） |
@@ -83,8 +83,8 @@ Cesium ion 令牌配置在 `.env`（该文件被版本控制忽略）。新机�
 - 每个景点提供一间有公开来源的具体酒店参考、周边住宿区域与地方美食查询入口。本机 `npm start` 时，详情「周边」还会显示城市天气预报，以及约 1.5 公里内的餐饮、酒店名录（链到高德）。**不提供实时房价、评分、房态或景区开放状态。** GitHub Pages 没有后端，仍只保留搜索链接。密钥为服务端 `AMAP_WEB_KEY`，不要写成 `VITE_`。
 - 本地模型 / 全景文件持久化、图层加载状态（含 3D Tiles 瓦片进度与失败文件名）、隐藏显示、定位、经纬度/高程微调（±1m/±10m）/ 旋转 / 比例、删除（本机 Express）。
 - **BIM 轻量拾取**：点击模型或带属性表的瓦片 → 高亮 + 属性面板；IFC→GLB 写入 `bim-properties.json` / glTF extras。无元数据时显示空状态。不含 RVT/OSGB 直转。
-- **GitHub Pages 内置全景**：无 Express 时自动加载 `public/demo-panoramas/` 中两张约 4K 压缩全景（椒江大桥公园、桐江书院；原片仍在本机 `720全景/`，已 gitignore，勿提交）。
-- **本机加载已有全景**：项目根保留 gitignore 的 `720全景/`（或任意 JPG），执行 `npm start`（或 `npm run dev`），用「导入我的内容」选全景；清单写入本机 `data/layers.json`，文件进 `uploads/`。Pages 显示仓库内 `public/demo-panoramas/` 压缩全景，不会自动同步本机原片。
+- **GitHub Pages 内置全景**：无 Express 时自动加载 `public/demo-panoramas/` 中三张约 4K 压缩全景（椒江大桥公园、桐江书院、临海大桥；椒江/桐江原片在仓库 `720全景/`，临海大桥原片在本机 `data/uploads/`）。
+- **本机加载已有全景**：执行 `npm start`（或 `npm run dev`），用「导入我的内容」选全景（或任意 JPG）；清单写入本机 `data/layers.json`，文件进 `uploads/`。Pages 显示仓库内 `public/demo-panoramas/` 压缩全景，不会自动同步本机原片。
 - 桌面布局与手机折叠侧栏、键盘可用的对话框和全景转动。
 - 旅行相册深链（`heritageAlbums` 映射 + `/heritage/` 轻量索引），上述 12 处已互链公开站相册（济南与青岛共用一页）；另有 3 处西藏子册为公开相册深链。
 
@@ -144,11 +144,11 @@ npm run build
 
 Cesium ion 网络不可用或未配置时优先保留内置基础地球，并在界面提示。OSM Buildings 失败时自动关闭开关并区分令牌缺失 / 权限 / 网络等原因。此应用并不包含 Google Earth 的专有摄影测量模型或 Street View 数据。景点酒店美食入口不是酒店预订系统，也不提供实时房态。
 
-此版本不含账号系统、跨设备同步、共享权限、自动 BIM 切片、RVT/OSGB 直接导入或地图商用发布配置。完整图层上传仍依赖本机 Express；GitHub Pages 承载静态浏览和两张内置全景（见上文降级表）。
+此版本不含账号系统、跨设备同步、共享权限、自动 BIM 切片、RVT/OSGB 直接导入或地图商用发布配置。完整图层上传仍依赖本机 Express；GitHub Pages 承载静态浏览和三张内置全景（见上文降级表）。
 
 ### English notes (P2)
 
-- **Layer UX**: upload progress + clearer API/tileset errors; 3D Tiles load progress / `tileFailed` filenames; lon/lat/height display and ±1m/±10m height nudges; Pages ships two built-in panoramas from `public/demo-panoramas/`.
+- **Layer UX**: upload progress + clearer API/tileset errors; 3D Tiles load progress / `tileFailed` filenames; lon/lat/height display and ±1m/±10m height nudges; Pages ships three built-in panoramas from `public/demo-panoramas/`.
 - **BIM light**: click model/feature → highlight + properties panel (IFC sidecar / glTF extras / tileset batch tables when present; empty state otherwise). No RVT/OSGB importers.
 - **Share camera**: copy `#v=lon,lat,height,heading,pitch,roll`; restores on load under `/3D-Earth/` base. No backend.
 - **Deferred (P3)**: account sync, live hotel APIs, large asset vendors.
